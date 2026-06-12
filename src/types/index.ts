@@ -1,3 +1,7 @@
+// Re-export all API types
+export * from './api';
+
+// UI Component Types
 export interface User {
   id: string;
   name: string;

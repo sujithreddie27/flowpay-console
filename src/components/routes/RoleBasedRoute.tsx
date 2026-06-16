@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import type { User } from '@/types';
+import { useAppSelector } from '@/store';
+import type { UserProfile } from '@/types';
 
 /**
  * RoleBasedRoute Component
@@ -8,40 +9,22 @@ import type { User } from '@/types';
  * Redirects to unauthorized page if user doesn't have required role.
  * 
  * @param allowedRoles - Array of roles that can access this route
- * 
- * TODO: Connect to actual auth state from Redux store (Day 7)
  */
 
 interface RoleBasedRouteProps {
-  allowedRoles: User['role'][];
+  allowedRoles: UserProfile['role'][];
 }
 
 export const RoleBasedRoute = ({ allowedRoles }: RoleBasedRouteProps) => {
-  // TODO: Replace with actual user from Redux store
-  // For now, using a mock user role from localStorage
-  const getUserRole = (): User['role'] | null => {
-    const userStr = localStorage.getItem('user');
-    if (!userStr) return null;
-    
-    try {
-      const user = JSON.parse(userStr) as User;
-      return user.role;
-    } catch {
-      return null;
-    }
-  };
-  
-  const userRole = getUserRole();
-  
-  if (!userRole) {
-    // User not found, redirect to login
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
-  
-  if (!allowedRoles.includes(userRole)) {
-    // User doesn't have required role, redirect to unauthorized page
+
+  if (!allowedRoles.includes(user.role)) {
     return <Navigate to="/unauthorized" replace />;
   }
-  
+
   return <Outlet />;
 };

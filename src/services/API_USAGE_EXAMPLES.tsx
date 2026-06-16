@@ -32,8 +32,6 @@ import {
 import {
   // React Query hooks
   useAuth,
-  useLogin,
-  useLogout,
   useAccounts,
   useAccount,
   useAccountBalance,
@@ -50,11 +48,11 @@ import {
 // ============================================================================
 
 export const LoginExample = () => {
-  const login = useLogin();
+  const { login, isLoading } = useAuth();
 
   const handleLogin = async () => {
     try {
-      await login.mutateAsync({
+      await login({
         email: 'user@example.com',
         password: 'password123',
         rememberMe: true,
@@ -66,8 +64,8 @@ export const LoginExample = () => {
   };
 
   return (
-    <button onClick={handleLogin} disabled={login.isPending}>
-      {login.isPending ? 'Logging in...' : 'Login'}
+    <button onClick={handleLogin} disabled={isLoading}>
+      {isLoading ? 'Logging in...' : 'Login'}
     </button>
   );
 };

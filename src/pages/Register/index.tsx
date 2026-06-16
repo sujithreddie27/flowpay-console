@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,6 +9,7 @@ import {
   EyeSlashIcon,
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
+import { useAuth } from '@/hooks';
 
 const registerSchema = z
   .object({
@@ -57,8 +58,22 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const { register: registerUser, isLoading, error: authError, clearError } = useAuth();
+
+  // Sync Redux auth error to local state
+  useEffect(() => {
+    if (authError) {
+      setApiError(authError);
+    }
+  }, [authError]);
+
+  // Clear auth error on unmount
+  useEffect(() => {
+    return () => {
+      clearError();
+    };
+  }, [clearError]);
 
   const {
     register,
@@ -77,34 +92,23 @@ export const RegisterPage = () => {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    setIsLoading(true);
     setApiError(null);
+    clearError();
 
     try {
-      // TODO: Replace with actual API call in Day 7
-      console.log('Registration data:', {
+      await registerUser({
         name: data.name,
         email: data.email,
         phone: data.phone,
         password: data.password,
+        confirmPassword: data.confirmPassword,
       });
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Simulate error for testing
-      // throw new Error('Email already registered');
-
-      // Success: Redirect to login or dashboard (will be implemented in Day 7)
-      console.log('Registration successful');
     } catch (error) {
       setApiError(
         error instanceof Error
           ? error.message
           : 'Registration failed. Please try again later.'
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 

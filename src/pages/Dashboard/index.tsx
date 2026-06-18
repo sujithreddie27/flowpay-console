@@ -9,8 +9,15 @@ import {
   PlusIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
-import { useDashboardStats, useRecentTransactions } from '@/hooks';
+import { useDashboardStats, useRecentTransactions, useDashboardCharts } from '@/hooks';
 import { Skeleton, StatusBadge } from '@/components/ui';
+import {
+  TransactionVolumeChart,
+  StatusDistributionChart,
+  RevenueByDayChart,
+  DateRangePicker,
+  useDateRange,
+} from '@/components/charts';
 import type { Transaction, DashboardStats } from '@/types';
 
 function formatCurrency(amount: number, currency: string = 'INR'): string {
@@ -290,7 +297,21 @@ export function DashboardPage() {
   const { data: stats, isLoading: statsLoading, isError: statsError } = useDashboardStats();
   const { data: recentData, isLoading: txnLoading } = useRecentTransactions(10);
 
+  const { range, setRange } = useDateRange('30d');
+  const {
+    data: chartData,
+    isLoading: chartsLoading,
+    isError: chartsError,
+  } = useDashboardCharts({
+    fromDate: range.fromDate,
+    toDate: range.toDate,
+  });
+
   const statCards = buildStatCards(stats);
+
+  const dateRangeAction = (
+    <DateRangePicker value={range} onChange={setRange} />
+  );
 
   return (
     <div className="space-y-6">
@@ -320,12 +341,37 @@ export function DashboardPage() {
         </div>
       )}
 
+      {/* Charts Section */}
+      <div className="space-y-6">
+        {/* Transaction Volume — full width */}
+        <TransactionVolumeChart
+          data={chartData?.volumeData ?? []}
+          loading={chartsLoading}
+          error={chartsError}
+          headerAction={dateRangeAction}
+        />
+
+        {/* Status Distribution + Revenue — side by side */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <StatusDistributionChart
+            data={chartData?.statusDistribution ?? []}
+            loading={chartsLoading}
+            error={chartsError}
+          />
+          <RevenueByDayChart
+            data={chartData?.revenueData ?? []}
+            loading={chartsLoading}
+            error={chartsError}
+          />
+        </div>
+      </div>
+
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent Transactions - spans 2 columns on large screens */}
         <div className="lg:col-span-2">
           <RecentTransactions
-            transactions={recentData?.items ?? []}
+            transactions={recentData ?? []}
             loading={txnLoading}
           />
         </div>

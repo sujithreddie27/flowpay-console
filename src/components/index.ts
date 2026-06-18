@@ -7,3 +7,6 @@ export { Breadcrumbs } from './Breadcrumbs';
 
 // UI Components Library
 export * from './ui';
+
+// Charts
+export * from './charts';

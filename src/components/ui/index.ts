@@ -25,3 +25,6 @@ export type { Toast, ToastType, ToastProviderProps } from './Toast';
 
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
+
+export { LiveIndicator } from './LiveIndicator';
+export type { LiveIndicatorProps, LiveIndicatorStatus } from './LiveIndicator';

@@ -1,14 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { dashboardService, queryKeys } from '@/services';
+import { websocketService } from '@/services/websocketService';
 
 /**
- * Hook for fetching dashboard statistics
+ * Hook for fetching dashboard statistics.
+ * Polls every 30s when WebSocket is disconnected, otherwise relies on
+ * real-time invalidation from the WebSocket layer.
  */
 export const useDashboardStats = () => {
   return useQuery({
     queryKey: queryKeys.dashboard.stats(),
     queryFn: () => dashboardService.getStats(),
-    refetchInterval: 60_000,
+    refetchInterval: () => {
+      // Poll every 30s as fallback when WebSocket is not connected
+      return websocketService.status !== 'connected' ? 30_000 : false;
+    },
   });
 };
 

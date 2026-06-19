@@ -9,8 +9,8 @@ import {
   PlusIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
-import { useDashboardStats, useRecentTransactions, useDashboardCharts } from '@/hooks';
-import { Skeleton, StatusBadge } from '@/components/ui';
+import { useDashboardStats, useRecentTransactions, useDashboardCharts, useRealtimeDashboard } from '@/hooks';
+import { Skeleton, StatusBadge, LiveIndicator, useToast } from '@/components/ui';
 import {
   TransactionVolumeChart,
   StatusDistributionChart,
@@ -18,7 +18,9 @@ import {
   DateRangePicker,
   useDateRange,
 } from '@/components/charts';
+import { invalidateQueries } from '@/services';
 import type { Transaction, DashboardStats } from '@/types';
+import type { RealtimeTransaction } from '@/hooks/useWebSocket';
 
 function formatCurrency(amount: number, currency: string = 'INR'): string {
   return new Intl.NumberFormat('en-IN', {
@@ -296,6 +298,7 @@ function QuickActions() {
 export function DashboardPage() {
   const { data: stats, isLoading: statsLoading, isError: statsError } = useDashboardStats();
   const { data: recentData, isLoading: txnLoading } = useRecentTransactions(10);
+  const toast = useToast();
 
   const { range, setRange } = useDateRange('30d');
   const {
@@ -307,6 +310,29 @@ export function DashboardPage() {
     toDate: range.toDate,
   });
 
+  // Real-time WebSocket connection for live transaction updates
+  const { status: wsStatus } = useRealtimeDashboard({
+    onNewTransaction: (update: RealtimeTransaction) => {
+      // Show toast notification for new transactions
+      const toastType = update.status === 'completed'
+        ? 'success'
+        : update.status === 'failed'
+          ? 'error'
+          : 'info';
+
+      toast[toastType](
+        `Transaction ${update.status}`,
+        update.referenceId
+          ? `${update.referenceId} — ${update.message}`
+          : update.message
+      );
+
+      // Invalidate dashboard queries to refresh stats
+      invalidateQueries.dashboard();
+      invalidateQueries.transactions();
+    },
+  });
+
   const statCards = buildStatCards(stats);
 
   const dateRangeAction = (
@@ -316,13 +342,16 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-secondary-900 dark:text-white">
-          Dashboard
-        </h1>
-        <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
-          Overview of your payment processing activity.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-secondary-900 dark:text-white">
+            Dashboard
+          </h1>
+          <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
+            Overview of your payment processing activity.
+          </p>
+        </div>
+        <LiveIndicator status={wsStatus} />
       </div>
 
       {/* Stats Grid */}

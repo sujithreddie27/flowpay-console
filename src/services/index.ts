@@ -9,6 +9,10 @@ export { default as paymentService } from './paymentService';
 export { default as dashboardService } from './dashboardService';
 export { default as settingsService } from './settingsService';
 
+// Export WebSocket service
+export { websocketService } from './websocketService';
+export type { ConnectionStatus, WebSocketEventHandler } from './websocketService';
+
 // Export React Query configuration and utilities
 export {
   default as queryClient,

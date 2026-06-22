@@ -78,7 +78,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
 Badge.displayName = 'Badge';
 
 export interface StatusBadgeProps extends Omit<BadgeProps, 'variant'> {
-  status: 'pending' | 'processing' | 'completed' | 'success' | 'failed' | 'error' | 'cancelled' | 'active' | 'inactive' | 'draft';
+  status: 'pending' | 'processing' | 'completed' | 'success' | 'failed' | 'error' | 'cancelled' | 'reversed' | 'active' | 'inactive' | 'draft';
 }
 
 export const StatusBadge = forwardRef<HTMLSpanElement, StatusBadgeProps>(
@@ -91,6 +91,7 @@ export const StatusBadge = forwardRef<HTMLSpanElement, StatusBadgeProps>(
       failed: { variant: 'danger', label: 'Failed' },
       error: { variant: 'danger', label: 'Error' },
       cancelled: { variant: 'secondary', label: 'Cancelled' },
+      reversed: { variant: 'warning', label: 'Reversed' },
       active: { variant: 'success', label: 'Active' },
       inactive: { variant: 'secondary', label: 'Inactive' },
       draft: { variant: 'secondary', label: 'Draft' },

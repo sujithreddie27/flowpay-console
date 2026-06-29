@@ -9,5 +9,8 @@ export * from './usePayments';
 export * from './useSettings';
 export * from './useTransactions';
 
+// Admin Hooks
+export * from './useAdmin';
+
 // Real-Time Hooks
 export * from './useWebSocket';

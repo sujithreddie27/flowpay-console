@@ -128,6 +128,16 @@ export const queryKeys = {
     profile: () => [...queryKeys.settings.all, 'profile'] as const,
     notifications: () => [...queryKeys.settings.all, 'notifications'] as const,
   },
+
+  // Admin keys
+  admin: {
+    all: ['admin'] as const,
+    stats: () => [...queryKeys.admin.all, 'stats'] as const,
+    processingRate: (params?: any) => [...queryKeys.admin.all, 'processingRate', params] as const,
+    latency: (params?: any) => [...queryKeys.admin.all, 'latency', params] as const,
+    topMerchants: (params?: any) => [...queryKeys.admin.all, 'topMerchants', params] as const,
+    alerts: (params?: any) => [...queryKeys.admin.all, 'alerts', params] as const,
+  },
 };
 
 /**
@@ -187,6 +197,13 @@ export const invalidateQueries = {
    */
   dashboard: () => {
     return queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+  },
+
+  /**
+   * Invalidate admin dashboard data
+   */
+  admin: () => {
+    return queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
   },
 
   /**

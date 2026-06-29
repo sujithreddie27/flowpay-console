@@ -8,6 +8,7 @@ export { default as transactionService } from './transactionService';
 export { default as paymentService } from './paymentService';
 export { default as dashboardService } from './dashboardService';
 export { default as settingsService } from './settingsService';
+export { default as adminService } from './adminService';
 
 // Export WebSocket service
 export { websocketService } from './websocketService';

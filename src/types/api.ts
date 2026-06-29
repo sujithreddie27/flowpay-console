@@ -392,6 +392,54 @@ export interface AuditLogParams extends PaginationParams {
   dateTo?: string;
 }
 
+// Admin Dashboard Types
+// ----------------------------------------------------------------------------
+
+export interface AdminDashboardStats {
+  totalUsers: number;
+  activeUsers: number;
+  transactionsToday: number;
+  totalVolumeToday: number;
+  totalVolumeCurrency: string;
+  systemHealth: 'healthy' | 'degraded' | 'down';
+  activeAlerts: number;
+  pendingTransactions: number;
+  failedTransactionsToday: number;
+}
+
+export interface ProcessingRateData {
+  timestamp: string;
+  rate: number;
+  successRate: number;
+  failureRate: number;
+}
+
+export interface SystemLatencyData {
+  timestamp: string;
+  p50: number;
+  p95: number;
+  p99: number;
+}
+
+export interface TopMerchant {
+  id: string;
+  name: string;
+  volume: number;
+  transactionCount: number;
+  currency: string;
+  successRate: number;
+}
+
+export interface AdminAlert {
+  id: string;
+  severity: 'critical' | 'warning' | 'info';
+  title: string;
+  message: string;
+  source: string;
+  createdAt: string;
+  acknowledged: boolean;
+}
+
 // WebSocket Types
 // ----------------------------------------------------------------------------
 

@@ -25,6 +25,9 @@ const SettingsPage = lazy(() => import('@/pages/Settings').then(module => ({ def
 
 // Admin Pages (Admin Role Only)
 const AdminDashboardPage = lazy(() => import('@/pages/Admin').then(module => ({ default: module.AdminDashboardPage })));
+const AdminUsersPage = lazy(() => import('@/pages/AdminUsers').then(module => ({ default: module.AdminUsersPage })));
+const AdminTransactionsPage = lazy(() => import('@/pages/AdminTransactions').then(module => ({ default: module.AdminTransactionsPage })));
+const AdminAuditTrailPage = lazy(() => import('@/pages/AdminAuditTrail').then(module => ({ default: module.AdminAuditTrailPage })));
 
 // Error Pages
 const NotFoundPage = lazy(() => import('@/pages/NotFound').then(module => ({ default: module.NotFoundPage })));
@@ -61,6 +64,9 @@ function App() {
               <Route element={<MainLayout />}>
                 <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+                <Route path="/admin/users" element={<AdminUsersPage />} />
+                <Route path="/admin/transactions" element={<AdminTransactionsPage />} />
+                <Route path="/admin/audit-trail" element={<AdminAuditTrailPage />} />
                 <Route path="/admin/*" element={<AdminDashboardPage />} />
               </Route>
             </Route>

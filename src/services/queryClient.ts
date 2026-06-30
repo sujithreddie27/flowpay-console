@@ -137,6 +137,13 @@ export const queryKeys = {
     latency: (params?: any) => [...queryKeys.admin.all, 'latency', params] as const,
     topMerchants: (params?: any) => [...queryKeys.admin.all, 'topMerchants', params] as const,
     alerts: (params?: any) => [...queryKeys.admin.all, 'alerts', params] as const,
+    users: () => [...queryKeys.admin.all, 'users'] as const,
+    userList: (params?: any) => [...queryKeys.admin.users(), 'list', params] as const,
+    userDetail: (id: string) => [...queryKeys.admin.users(), 'detail', id] as const,
+    userTransactions: (id: string, params?: any) => [...queryKeys.admin.users(), id, 'transactions', params] as const,
+    transactions: (params?: any) => [...queryKeys.admin.all, 'transactions', params] as const,
+    transactionFlags: (id: string) => [...queryKeys.admin.all, 'transactionFlags', id] as const,
+    auditLog: (params?: any) => [...queryKeys.admin.all, 'auditLog', params] as const,
   },
 };
 

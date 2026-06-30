@@ -392,6 +392,88 @@ export interface AuditLogParams extends PaginationParams {
   dateTo?: string;
 }
 
+// Admin User Management Types
+// ----------------------------------------------------------------------------
+
+export type AdminUserStatus = 'active' | 'inactive' | 'suspended';
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: 'admin' | 'user' | 'operator';
+  status: AdminUserStatus;
+  avatar?: string;
+  accountsCount: number;
+  totalTransactions: number;
+  totalVolume: number;
+  lastLoginAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminUserListParams extends PaginationParams {
+  search?: string;
+  status?: AdminUserStatus;
+  role?: 'admin' | 'user' | 'operator';
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface AdminUserDetail extends AdminUser {
+  accounts: Account[];
+  recentTransactions: Transaction[];
+}
+
+export interface UpdateAdminUserRequest {
+  status?: AdminUserStatus;
+  role?: 'admin' | 'user' | 'operator';
+  reason?: string;
+}
+
+// Admin Transaction Management Types
+// ----------------------------------------------------------------------------
+
+export interface AdminTransactionListParams extends TransactionListParams {
+  userId?: string;
+  flagged?: boolean;
+}
+
+export interface AdminTransactionOverride {
+  transactionId: string;
+  newStatus: TransactionStatus;
+  reason: string;
+}
+
+export interface FlagTransactionRequest {
+  transactionId: string;
+  reason: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+}
+
+export interface TransactionFlag {
+  id: string;
+  transactionId: string;
+  flaggedBy: string;
+  reason: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  status: 'open' | 'reviewed' | 'dismissed';
+  createdAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+}
+
+export interface BulkRetryRequest {
+  transactionIds: string[];
+  idempotencyKey: string;
+}
+
+export interface BulkRetryResponse {
+  succeeded: string[];
+  failed: Array<{ id: string; reason: string }>;
+}
+
 // Admin Dashboard Types
 // ----------------------------------------------------------------------------
 

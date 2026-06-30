@@ -11,6 +11,9 @@ import {
   Cog6ToothIcon,
   UserGroupIcon,
   ChevronLeftIcon,
+  ShieldCheckIcon,
+  DocumentMagnifyingGlassIcon,
+  ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/utils';
 import type { NavItem } from '@/types';
@@ -21,7 +24,10 @@ const navigation: NavItem[] = [
   { name: 'Payments', href: '/payments/new', icon: CreditCardIcon },
   { name: 'Accounts', href: '/accounts', icon: BanknotesIcon },
   { name: 'Monitoring', href: '/monitoring', icon: ChartBarIcon },
+  { name: 'Admin', href: '/admin/dashboard', icon: ShieldCheckIcon },
   { name: 'Users', href: '/admin/users', icon: UserGroupIcon },
+  { name: 'All Transactions', href: '/admin/transactions', icon: DocumentMagnifyingGlassIcon },
+  { name: 'Audit Trail', href: '/admin/audit-trail', icon: ClipboardDocumentListIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];
 

@@ -546,3 +546,73 @@ export interface SystemNotificationMessage {
   priority: 'low' | 'medium' | 'high';
   timestamp: string;
 }
+
+// Monitoring Types
+// ----------------------------------------------------------------------------
+
+export type ServiceStatus = 'up' | 'down' | 'degraded';
+
+export interface ServiceHealth {
+  name: string;
+  status: ServiceStatus;
+  latency?: number;
+  uptime?: number;
+  lastChecked: string;
+  details?: Record<string, any>;
+}
+
+export interface SystemHealthResponse {
+  overallStatus: 'healthy' | 'degraded' | 'down';
+  services: ServiceHealth[];
+  lastCheck: string;
+}
+
+export interface ApiResponseTimeData {
+  timestamp: string;
+  p50: number;
+  p95: number;
+  p99: number;
+  avg: number;
+}
+
+export interface ErrorRateData {
+  timestamp: string;
+  errorRate: number;
+  errorCount: number;
+  totalRequests: number;
+}
+
+export interface KafkaConsumerLagData {
+  topic: string;
+  partition: number;
+  currentOffset: number;
+  endOffset: number;
+  lag: number;
+  consumerGroup: string;
+}
+
+export type AlertSeverity = 'critical' | 'warning' | 'info';
+export type AlertStatus = 'active' | 'acknowledged' | 'resolved';
+
+export interface MonitoringAlert {
+  id: string;
+  severity: AlertSeverity;
+  status: AlertStatus;
+  title: string;
+  message: string;
+  source: string;
+  metric?: string;
+  threshold?: number;
+  currentValue?: number;
+  createdAt: string;
+  acknowledgedAt?: string;
+  acknowledgedBy?: string;
+  resolvedAt?: string;
+}
+
+export interface MonitoringAlertListParams {
+  severity?: AlertSeverity;
+  status?: AlertStatus;
+  page?: number;
+  pageSize?: number;
+}

@@ -145,6 +145,16 @@ export const queryKeys = {
     transactionFlags: (id: string) => [...queryKeys.admin.all, 'transactionFlags', id] as const,
     auditLog: (params?: any) => [...queryKeys.admin.all, 'auditLog', params] as const,
   },
+
+  // Monitoring keys
+  monitoring: {
+    all: ['monitoring'] as const,
+    health: () => [...queryKeys.monitoring.all, 'health'] as const,
+    responseTimes: (params?: any) => [...queryKeys.monitoring.all, 'responseTimes', params] as const,
+    errorRates: (params?: any) => [...queryKeys.monitoring.all, 'errorRates', params] as const,
+    kafkaLag: () => [...queryKeys.monitoring.all, 'kafkaLag'] as const,
+    alerts: (params?: any) => [...queryKeys.monitoring.all, 'alerts', params] as const,
+  },
 };
 
 /**

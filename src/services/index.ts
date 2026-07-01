@@ -9,6 +9,7 @@ export { default as paymentService } from './paymentService';
 export { default as dashboardService } from './dashboardService';
 export { default as settingsService } from './settingsService';
 export { default as adminService } from './adminService';
+export { default as monitoringService } from './monitoringService';
 
 // Export WebSocket service
 export { websocketService } from './websocketService';

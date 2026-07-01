@@ -9,5 +9,8 @@ export * from './usePayments';
 export * from './useSettings';
 export * from './useTransactions';
 
+// Monitoring Hooks
+export * from './useMonitoring';
+
 // Real-Time Hooks
 export * from './useWebSocket';

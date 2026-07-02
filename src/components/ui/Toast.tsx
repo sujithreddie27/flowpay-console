@@ -128,6 +128,9 @@ export const ToastProvider = ({
       <div
         className={cn('fixed z-50 flex flex-col gap-2 pointer-events-none', positions[position])}
         style={{ maxWidth: '420px' }}
+        aria-live="polite"
+        aria-atomic="false"
+        role="status"
       >
         {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onClose={() => removeToast(toast.id)} />

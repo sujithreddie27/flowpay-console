@@ -40,11 +40,12 @@ interface SidebarProps {
 
 function NavItems({ collapsed }: { collapsed: boolean }) {
   return (
-    <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+    <nav aria-label="Main navigation" className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
       {navigation.map((item) => (
         <NavLink
           key={item.name}
           to={item.href}
+          aria-label={collapsed ? item.name : undefined}
           className={({ isActive }) =>
             cn(
               'group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150',
@@ -166,6 +167,7 @@ export function Sidebar({ isOpen, isCollapsed, onClose, onToggleCollapse }: Side
             <button
               type="button"
               onClick={onToggleCollapse}
+              aria-label="Collapse sidebar"
               className="p-1.5 rounded-md text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 dark:hover:bg-secondary-800 dark:hover:text-secondary-300 transition-colors"
             >
               <ChevronLeftIcon className="h-4 w-4" />

@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useRef } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import {
   Bars3Icon,
@@ -8,6 +8,7 @@ import {
   SunIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/utils';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -19,6 +20,31 @@ export function Header({ onMenuClick }: HeaderProps) {
   );
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useKeyboardShortcuts([
+    {
+      key: 'k',
+      ctrl: true,
+      handler: () => {
+        searchInputRef.current?.focus();
+        setShowSearch(true);
+      },
+      description: 'Focus search',
+    },
+    {
+      key: 'Escape',
+      handler: () => {
+        if (document.activeElement === searchInputRef.current) {
+          searchInputRef.current?.blur();
+          setShowSearch(false);
+          setSearchQuery('');
+        }
+      },
+      preventDefault: false,
+      description: 'Close search / modals',
+    },
+  ]);
 
   const toggleTheme = () => {
     document.documentElement.classList.toggle('dark');
@@ -48,14 +74,19 @@ export function Header({ onMenuClick }: HeaderProps) {
               <MagnifyingGlassIcon className="h-4 w-4 text-secondary-400" aria-hidden="true" />
             </div>
             <input
+              ref={searchInputRef}
               type="search"
               placeholder="Search transactions, accounts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setShowSearch(true)}
               onBlur={() => setShowSearch(false)}
-              className="block w-full rounded-lg border-0 bg-secondary-50 dark:bg-secondary-800 py-2 pl-10 pr-3 text-sm text-secondary-900 dark:text-secondary-100 placeholder:text-secondary-400 dark:placeholder:text-secondary-500 ring-1 ring-inset ring-secondary-200 dark:ring-secondary-700 focus:ring-2 focus:ring-primary-500 transition-all"
+              aria-label="Search transactions and accounts"
+              className="block w-full rounded-lg border-0 bg-secondary-50 dark:bg-secondary-800 py-2 pl-10 pr-16 text-sm text-secondary-900 dark:text-secondary-100 placeholder:text-secondary-400 dark:placeholder:text-secondary-500 ring-1 ring-inset ring-secondary-200 dark:ring-secondary-700 focus:ring-2 focus:ring-primary-500 transition-all"
             />
+            <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center gap-0.5 rounded border border-secondary-300 dark:border-secondary-600 bg-secondary-100 dark:bg-secondary-700 px-1.5 py-0.5 text-[10px] font-medium text-secondary-500 dark:text-secondary-400">
+              <span className="text-[11px]">⌘</span>K
+            </kbd>
           </div>
         </div>
 
@@ -65,6 +96,8 @@ export function Header({ onMenuClick }: HeaderProps) {
           <button
             type="button"
             onClick={toggleTheme}
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-pressed={isDark}
             className="p-2 rounded-lg text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100 dark:text-secondary-400 dark:hover:text-secondary-200 dark:hover:bg-secondary-800 transition-colors"
           >
             <span className="sr-only">Toggle theme</span>

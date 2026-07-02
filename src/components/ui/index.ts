@@ -26,5 +26,8 @@ export type { Toast, ToastType, ToastProviderProps } from './Toast';
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
 
+export { RetryError } from './RetryError';
+export type { RetryErrorProps } from './RetryError';
+
 export { LiveIndicator } from './LiveIndicator';
 export type { LiveIndicatorProps, LiveIndicatorStatus } from './LiveIndicator';

@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { MainLayout, AuthLayout, ProtectedRoute, RoleBasedRoute } from '@/components';
+import { MainLayout, AuthLayout, ProtectedRoute, RoleBasedRoute, ErrorBoundary } from '@/components';
 
 // Loading component for lazy-loaded pages
 const LoadingFallback = () => (
@@ -35,9 +35,10 @@ const UnauthorizedPage = lazy(() => import('@/pages/Unauthorized').then(module =
 
 function App() {
   return (
-    <BrowserRouter>
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
           {/* Public Routes - Auth Layout */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
@@ -82,6 +83,7 @@ function App() {
         </Routes>
       </Suspense>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

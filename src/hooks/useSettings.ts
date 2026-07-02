@@ -27,8 +27,21 @@ export const useUpdateProfile = () => {
   return useMutation({
     mutationFn: (updates: UpdateProfileRequest) =>
       settingsService.updateProfile(updates),
-    onSuccess: (data) => {
-      queryClient.setQueryData(queryKeys.settings.profile(), data);
+    onMutate: async (updates) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.settings.profile() });
+      const previousData = queryClient.getQueryData(queryKeys.settings.profile());
+      queryClient.setQueryData(queryKeys.settings.profile(), (old: unknown) =>
+        old ? { ...(old as object), ...updates } : old
+      );
+      return { previousData };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKeys.settings.profile(), context.previousData);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings.profile() });
     },
   });
 };
@@ -70,8 +83,21 @@ export const useUpdateNotificationPreferences = () => {
   return useMutation({
     mutationFn: (preferences: UpdateNotificationPreferencesRequest) =>
       settingsService.updateNotificationPreferences(preferences),
-    onSuccess: (data) => {
-      queryClient.setQueryData(queryKeys.settings.notifications(), data);
+    onMutate: async (preferences) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.settings.notifications() });
+      const previousData = queryClient.getQueryData(queryKeys.settings.notifications());
+      queryClient.setQueryData(queryKeys.settings.notifications(), (old: unknown) =>
+        old ? { ...(old as object), ...preferences } : old
+      );
+      return { previousData };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKeys.settings.notifications(), context.previousData);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings.notifications() });
     },
   });
 };
@@ -87,20 +113,53 @@ export const useAddPaymentMethod = () => {
 };
 
 export const useRemovePaymentMethod = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (methodId: string) =>
       paymentService.removePaymentMethod(methodId),
-    onSuccess: () => {
+    onMutate: async (methodId) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.payments.methods() });
+      const previousMethods = queryClient.getQueryData(queryKeys.payments.methods());
+      queryClient.setQueryData(queryKeys.payments.methods(), (old: unknown) =>
+        Array.isArray(old) ? old.filter((m: { id: string }) => m.id !== methodId) : old
+      );
+      return { previousMethods };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previousMethods) {
+        queryClient.setQueryData(queryKeys.payments.methods(), context.previousMethods);
+      }
+    },
+    onSettled: () => {
       invalidateQueries.payments();
     },
   });
 };
 
 export const useSetDefaultPaymentMethod = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (methodId: string) =>
       paymentService.setDefaultPaymentMethod(methodId),
-    onSuccess: () => {
+    onMutate: async (methodId) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.payments.methods() });
+      const previousMethods = queryClient.getQueryData(queryKeys.payments.methods());
+      queryClient.setQueryData(queryKeys.payments.methods(), (old: unknown) =>
+        Array.isArray(old)
+          ? old.map((m: { id: string; isDefault?: boolean }) => ({
+              ...m,
+              isDefault: m.id === methodId,
+            }))
+          : old
+      );
+      return { previousMethods };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previousMethods) {
+        queryClient.setQueryData(queryKeys.payments.methods(), context.previousMethods);
+      }
+    },
+    onSettled: () => {
       invalidateQueries.payments();
     },
   });

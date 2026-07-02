@@ -1,6 +1,11 @@
 export { useMediaQuery } from './useMediaQuery';
 export { useSidebarState } from './useSidebarState';
 
+// UX Hooks
+export { useKeyboardShortcuts } from './useKeyboardShortcuts';
+export { useUnsavedChanges } from './useUnsavedChanges';
+export { useInfiniteScroll } from './useInfiniteScroll';
+
 // API Hooks
 export * from './useAuth';
 export * from './useAccounts';

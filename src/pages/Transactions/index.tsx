@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   MagnifyingGlassIcon,
@@ -8,8 +8,8 @@ import {
   ArrowPathIcon,
   BanknotesIcon,
 } from '@heroicons/react/24/outline';
-import { Table, Badge, StatusBadge, Button, Input, EmptyState } from '@/components/ui';
-import { useTransactions } from '@/hooks';
+import { Table, Badge, StatusBadge, Button, Input, EmptyState, RetryError, LoadingSpinner } from '@/components/ui';
+import { useTransactions, useMediaQuery, useInfiniteScroll } from '@/hooks';
 import type { Column } from '@/components/ui';
 import type {
   Transaction,
@@ -124,8 +124,10 @@ function exportTransactionsToCSV(transactions: Transaction[]) {
 
 export function TransactionsPage() {
   const navigate = useNavigate();
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const [page, setPage] = useState(1);
+  const [mobilePages, setMobilePages] = useState<Transaction[]>([]);
   const [sortBy, setSortBy] = useState<string>('initiatedAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [search, setSearch] = useState('');
@@ -159,7 +161,30 @@ export function TransactionsPage() {
     return p;
   }, [page, sortBy, sortOrder, search, statusFilter, typeFilter, dateFrom, dateTo, amountMin, amountMax]);
 
-  const { data, isLoading, isError, refetch } = useTransactions(params);
+  const { data, isLoading, isError, isFetching, refetch } = useTransactions(params);
+
+  // Accumulate pages for mobile infinite scroll
+  const hasNextPage = data ? page < data.totalPages : false;
+  const prevDataRef = useRef(data?.items);
+
+  // Update mobilePages when new data arrives
+  useEffect(() => {
+    if (isMobile && data?.items && data.items !== prevDataRef.current) {
+      prevDataRef.current = data.items;
+      if (page === 1) {
+        setMobilePages(data.items);
+      } else {
+        setMobilePages((prev) => [...prev, ...data.items]);
+      }
+    }
+  }, [data?.items, page, isMobile]);
+
+  const { sentinelRef } = useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage: isFetching && page > 1,
+    fetchNextPage: () => setPage((p) => p + 1),
+    enabled: isMobile,
+  });
 
   const handleSort = useCallback((key: string, direction: 'asc' | 'desc') => {
     setSortBy(key);
@@ -593,61 +618,156 @@ export function TransactionsPage() {
 
       {/* Error State */}
       {isError && (
-        <div className="rounded-xl bg-danger-50 dark:bg-danger-900/20 p-4 text-sm text-danger-700 dark:text-danger-400 flex items-center justify-between">
-          <span>Failed to load transactions. Please try again.</span>
-          <Button variant="ghost" size="sm" onClick={() => refetch()}>
-            Retry
-          </Button>
+        <RetryError
+          title="Failed to load transactions"
+          message="We couldn't load your transactions. Please check your connection and try again."
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+          variant="card"
+        />
+      )}
+
+      {/* Data Table - Desktop */}
+      {!isMobile && (
+        <div className="rounded-xl bg-white dark:bg-secondary-800 shadow-sm ring-1 ring-secondary-200 dark:ring-secondary-700 overflow-hidden">
+          {!isError && (
+            <Table<Transaction>
+              data={data?.items || []}
+              columns={columns}
+              loading={isLoading}
+              onSort={handleSort}
+              striped
+              emptyMessage="No transactions found"
+              pagination={
+                data
+                  ? {
+                      currentPage: data.page,
+                      totalPages: data.totalPages,
+                      pageSize: data.pageSize,
+                      totalItems: data.total,
+                      onPageChange: setPage,
+                    }
+                  : undefined
+              }
+            />
+          )}
+
+          {/* Empty state with filters active */}
+          {!isLoading && !isError && data?.items?.length === 0 && activeFilterCount > 0 && (
+            <EmptyState
+              icon={<FunnelIcon className="h-8 w-8" />}
+              title="No matching transactions"
+              description="Try adjusting your filters or search criteria to find what you're looking for."
+              action={{ label: 'Clear Filters', onClick: clearFilters }}
+            />
+          )}
+
+          {/* Empty state without filters */}
+          {!isLoading && !isError && data?.items?.length === 0 && activeFilterCount === 0 && !search && (
+            <EmptyState
+              icon={<BanknotesIcon className="h-8 w-8" />}
+              title="No transactions yet"
+              description="Transactions will appear here once payments are processed."
+              action={{
+                label: 'New Payment',
+                onClick: () => navigate('/payments/new'),
+              }}
+            />
+          )}
         </div>
       )}
 
-      {/* Data Table */}
-      <div className="rounded-xl bg-white dark:bg-secondary-800 shadow-sm ring-1 ring-secondary-200 dark:ring-secondary-700 overflow-hidden">
-        {!isError && (
-          <Table<Transaction>
-            data={data?.items || []}
-            columns={columns}
-            loading={isLoading}
-            onSort={handleSort}
-            striped
-            emptyMessage="No transactions found"
-            pagination={
-              data
-                ? {
-                    currentPage: data.page,
-                    totalPages: data.totalPages,
-                    pageSize: data.pageSize,
-                    totalItems: data.total,
-                    onPageChange: setPage,
-                  }
-                : undefined
-            }
-          />
-        )}
+      {/* Mobile Card View with Infinite Scroll */}
+      {isMobile && !isError && (
+        <div className="space-y-3">
+          {isLoading && page === 1 ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="animate-pulse rounded-xl bg-white dark:bg-secondary-800 p-4 shadow-sm ring-1 ring-secondary-200 dark:ring-secondary-700">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 w-24 rounded bg-secondary-200 dark:bg-secondary-700" />
+                    <div className="h-5 w-16 rounded-full bg-secondary-200 dark:bg-secondary-700" />
+                  </div>
+                  <div className="mt-3 h-5 w-32 rounded bg-secondary-200 dark:bg-secondary-700" />
+                  <div className="mt-2 h-3 w-40 rounded bg-secondary-200 dark:bg-secondary-700" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              {(mobilePages.length > 0 ? mobilePages : data?.items || []).map((tx) => (
+                <button
+                  key={tx.id}
+                  onClick={() => navigate(`/transactions/${tx.id}`)}
+                  className="w-full rounded-xl bg-white dark:bg-secondary-800 p-4 shadow-sm ring-1 ring-secondary-200 dark:ring-secondary-700 text-left hover:ring-primary-300 dark:hover:ring-primary-700 transition-all active:scale-[0.98]"
+                  aria-label={`Transaction ${tx.referenceId} - ${formatCurrency(tx.amount, tx.currency)}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs text-secondary-500 dark:text-secondary-400">
+                      {tx.referenceId}
+                    </span>
+                    <StatusBadge status={tx.status} size="sm" rounded />
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-secondary-900 dark:text-secondary-100">
+                        {tx.recipient?.name || tx.sender?.name || 'Unknown'}
+                      </p>
+                      <p className="mt-0.5 text-xs text-secondary-500 dark:text-secondary-400">
+                        {formatDate(tx.initiatedAt)}
+                      </p>
+                    </div>
+                    <span className={`text-base font-semibold tabular-nums ${
+                      tx.type === 'credit' || tx.type === 'refund'
+                        ? 'text-success-600 dark:text-success-400'
+                        : 'text-secondary-900 dark:text-secondary-100'
+                    }`}>
+                      {tx.type === 'credit' || tx.type === 'refund' ? '+' : '-'}
+                      {formatCurrency(tx.amount, tx.currency)}
+                    </span>
+                  </div>
+                </button>
+              ))}
 
-        {/* Empty state with filters active */}
-        {!isLoading && !isError && data?.items?.length === 0 && activeFilterCount > 0 && (
-          <EmptyState
-            icon={<FunnelIcon className="h-8 w-8" />}
-            title="No matching transactions"
-            description="Try adjusting your filters or search criteria to find what you're looking for."
-            action={{ label: 'Clear Filters', onClick: clearFilters }}
-          />
-        )}
+              {/* Infinite scroll sentinel */}
+              <div ref={sentinelRef} className="h-1" />
 
-        {/* Empty state without filters */}
-        {!isLoading && !isError && data?.items?.length === 0 && activeFilterCount === 0 && !search && (
-          <EmptyState
-            icon={<BanknotesIcon className="h-8 w-8" />}
-            title="No transactions yet"
-            description="Transactions will appear here once payments are processed."
-            action={{
-              label: 'New Payment',
-              onClick: () => navigate('/payments/new'),
-            }}
-          />
-        )}
-      </div>
+              {/* Loading indicator for next page */}
+              {isFetching && page > 1 && (
+                <div className="flex items-center justify-center py-4">
+                  <LoadingSpinner size="sm" />
+                  <span className="ml-2 text-sm text-secondary-500">Loading more...</span>
+                </div>
+              )}
+
+              {/* End of list */}
+              {!hasNextPage && mobilePages.length > 0 && (
+                <p className="py-4 text-center text-xs text-secondary-400 dark:text-secondary-500">
+                  All transactions loaded
+                </p>
+              )}
+            </>
+          )}
+
+          {/* Mobile empty states */}
+          {!isLoading && data?.items?.length === 0 && activeFilterCount > 0 && (
+            <EmptyState
+              icon={<FunnelIcon className="h-8 w-8" />}
+              title="No matching transactions"
+              description="Try adjusting your filters."
+              action={{ label: 'Clear Filters', onClick: clearFilters }}
+            />
+          )}
+          {!isLoading && data?.items?.length === 0 && activeFilterCount === 0 && !search && (
+            <EmptyState
+              icon={<BanknotesIcon className="h-8 w-8" />}
+              title="No transactions yet"
+              description="Transactions will appear here once payments are processed."
+              action={{ label: 'New Payment', onClick: () => navigate('/payments/new') }}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

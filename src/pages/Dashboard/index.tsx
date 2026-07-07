@@ -171,20 +171,20 @@ function RecentTransactions({ transactions, loading }: RecentTransactionsProps) 
           <ArrowRightIcon className="h-3.5 w-3.5" />
         </Link>
       </div>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
         <table className="w-full">
           <thead className="bg-secondary-50 dark:bg-secondary-800/50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-secondary-500 dark:text-secondary-400 sm:px-6">
                 Transaction
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+              <th className="hidden xs:table-cell px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-secondary-500 dark:text-secondary-400 sm:px-6">
                 Type
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-secondary-500 dark:text-secondary-400 sm:px-6">
                 Status
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-secondary-500 dark:text-secondary-400 sm:px-6">
                 Amount
               </th>
               <th className="hidden sm:table-cell px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
@@ -198,7 +198,7 @@ function RecentTransactions({ transactions, loading }: RecentTransactionsProps) 
                 key={txn.id}
                 className="hover:bg-secondary-50 dark:hover:bg-secondary-800/50 transition-colors"
               >
-                <td className="whitespace-nowrap px-6 py-4">
+                <td className="whitespace-nowrap px-4 py-4 sm:px-6">
                   <Link
                     to={`/transactions/${txn.id}`}
                     className="text-sm font-medium text-secondary-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400"
@@ -211,15 +211,15 @@ function RecentTransactions({ transactions, loading }: RecentTransactionsProps) 
                     </p>
                   )}
                 </td>
-                <td className="whitespace-nowrap px-6 py-4">
+                <td className="hidden xs:table-cell whitespace-nowrap px-4 py-4 sm:px-6">
                   <span className="inline-flex items-center text-xs font-medium capitalize text-secondary-700 dark:text-secondary-300">
                     {txn.type}
                   </span>
                 </td>
-                <td className="whitespace-nowrap px-6 py-4">
+                <td className="whitespace-nowrap px-4 py-4 sm:px-6">
                   <StatusBadge status={txn.status as any} size="sm" dot rounded />
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-right">
+                <td className="whitespace-nowrap px-4 py-4 text-right sm:px-6">
                   <span
                     className={`text-sm font-semibold ${
                       txn.type === 'credit' || txn.type === 'refund'

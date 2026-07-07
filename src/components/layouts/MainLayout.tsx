@@ -3,11 +3,23 @@ import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { PageTransition } from '@/components/PageTransition';
 import { useSidebarState } from '@/hooks';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useMediaQuery } from '@/hooks';
 import { cn } from '@/utils';
 
 export function MainLayout() {
   const { isOpen, isCollapsed, open, close, toggleCollapse } = useSidebarState();
   const location = useLocation();
+  const isMobile = useMediaQuery('(max-width: 1023px)');
+
+  // Swipe right from left edge to open sidebar, swipe left to close
+  useSwipeGesture({
+    onSwipeRight: open,
+    onSwipeLeft: close,
+    enabled: isMobile,
+    threshold: 60,
+    edgeWidth: 24,
+  });
 
   return (
     <div className="min-h-screen bg-secondary-50 dark:bg-secondary-950">

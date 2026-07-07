@@ -10,6 +10,8 @@ export interface ModalProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   closeOnOverlayClick?: boolean;
   showCloseButton?: boolean;
+  /** On mobile, take up full screen height */
+  mobileFullScreen?: boolean;
 }
 
 export const Modal = ({
@@ -19,6 +21,7 @@ export const Modal = ({
   size = 'md',
   closeOnOverlayClick = true,
   showCloseButton = true,
+  mobileFullScreen = false,
 }: ModalProps) => {
   const sizes = {
     sm: 'max-w-md',
@@ -48,26 +51,33 @@ export const Modal = ({
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <div className={cn(
+            'flex min-h-full items-center justify-center text-center',
+            mobileFullScreen ? 'p-0 sm:p-4' : 'p-4'
+          )}>
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
+              enterFrom="opacity-0 scale-95 sm:translate-y-0 translate-y-4"
+              enterTo="opacity-100 scale-100 translate-y-0"
               leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+              leaveFrom="opacity-100 scale-100 translate-y-0"
+              leaveTo="opacity-0 scale-95 sm:translate-y-0 translate-y-4"
             >
               <Dialog.Panel
                 className={cn(
-                  'w-full transform overflow-hidden rounded-2xl bg-white dark:bg-secondary-900 text-left align-middle shadow-2xl transition-all',
+                  'w-full transform overflow-hidden bg-white dark:bg-secondary-900 text-left align-middle shadow-2xl transition-all',
+                  mobileFullScreen
+                    ? 'min-h-screen sm:min-h-0 rounded-none sm:rounded-2xl'
+                    : 'rounded-2xl',
                   sizes[size]
                 )}
+                style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
               >
                 {showCloseButton && (
                   <button
                     type="button"
-                    className="absolute right-4 top-4 rounded-lg p-1.5 text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 dark:hover:bg-secondary-800 dark:hover:text-secondary-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="absolute right-3 top-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 dark:hover:bg-secondary-800 dark:hover:text-secondary-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 sm:right-4 sm:top-4"
                     onClick={onClose}
                   >
                     <span className="sr-only">Close</span>

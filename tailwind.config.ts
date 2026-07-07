@@ -7,6 +7,14 @@ export default {
   ],
   darkMode: 'class',
   theme: {
+    screens: {
+      'xs': '375px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       colors: {
         primary: {
@@ -111,5 +119,11 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Custom plugin for touch-device specific utilities
+    function({ addVariant }: { addVariant: (name: string, definition: string) => void }) {
+      addVariant('touch', '@media (pointer: coarse)');
+      addVariant('no-touch', '@media (pointer: fine)');
+    },
+  ],
 } satisfies Config

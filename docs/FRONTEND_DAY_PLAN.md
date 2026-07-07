@@ -271,13 +271,13 @@
 ## Week 5: Performance, Responsiveness & Production Readiness
 
 ### Day 21 — Responsive Design & Mobile Optimization
-- [ ] Audit all pages on mobile viewport (375px, 768px)
-- [ ] Fix table layouts for mobile (horizontal scroll or card view)
-- [ ] Optimize sidebar for mobile (drawer behavior)
-- [ ] Ensure all modals are mobile-friendly
-- [ ] Test touch interactions (swipe, tap targets)
-- [ ] Add PWA manifest and service worker (optional)
-- [ ] Test on multiple browsers (Chrome, Firefox, Safari)
+- [x] Audit all pages on mobile viewport (375px, 768px)
+- [x] Fix table layouts for mobile (horizontal scroll or card view)
+- [x] Optimize sidebar for mobile (drawer behavior)
+- [x] Ensure all modals are mobile-friendly
+- [x] Test touch interactions (swipe, tap targets)
+- [x] Add PWA manifest and service worker (optional)
+- [x] Test on multiple browsers (Chrome, Firefox, Safari)
 
 ### Day 22 — Performance Optimization
 - [ ] Implement code splitting per route (lazy loading)

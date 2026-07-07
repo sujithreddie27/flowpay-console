@@ -9,6 +9,8 @@ export interface Column<T> {
   render?: (value: any, row: T, index: number) => ReactNode;
   className?: string;
   headerClassName?: string;
+  /** Hide this column on mobile viewports */
+  hideOnMobile?: boolean;
 }
 
 export interface TableProps<T> {
@@ -27,6 +29,8 @@ export interface TableProps<T> {
   className?: string;
   striped?: boolean;
   hoverable?: boolean;
+  /** Render a mobile card for each row instead of a table on small screens */
+  mobileCardRender?: (row: T, index: number) => ReactNode;
 }
 
 type SortState = {
@@ -44,6 +48,7 @@ export function Table<T extends Record<string, any>>({
   className,
   striped = false,
   hoverable = true,
+  mobileCardRender,
 }: TableProps<T>) {
   const [sortState, setSortState] = useState<SortState>(null);
 
@@ -127,7 +132,18 @@ export function Table<T extends Record<string, any>>({
 
   return (
     <div className="w-full space-y-4">
-      <div className="overflow-x-auto rounded-lg border border-secondary-200 dark:border-secondary-800">
+      {/* Mobile Card View */}
+      {mobileCardRender && (
+        <div className="block md:hidden space-y-3">
+          {data.map((row, index) => mobileCardRender(row, index))}
+        </div>
+      )}
+
+      {/* Desktop/Tablet Table View */}
+      <div className={cn(
+        'overflow-x-auto rounded-lg border border-secondary-200 dark:border-secondary-800 -webkit-overflow-scrolling-touch',
+        mobileCardRender && 'hidden md:block'
+      )}>
         <table className={cn('w-full', className)}>
           <thead className="bg-secondary-50 dark:bg-secondary-800">
             <tr>
@@ -135,8 +151,9 @@ export function Table<T extends Record<string, any>>({
                 <th
                   key={column.key}
                   className={cn(
-                    'px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider',
+                    'px-4 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider sm:px-6',
                     column.sortable && onSort && 'cursor-pointer select-none hover:bg-secondary-100 dark:hover:bg-secondary-700',
+                    column.hideOnMobile && 'hidden sm:table-cell',
                     column.headerClassName
                   )}
                   onClick={() => column.sortable && handleSort(column.key)}
@@ -181,7 +198,8 @@ export function Table<T extends Record<string, any>>({
                   <td
                     key={column.key}
                     className={cn(
-                      'px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100',
+                      'px-4 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100 sm:px-6',
+                      column.hideOnMobile && 'hidden sm:table-cell',
                       column.className
                     )}
                   >
@@ -195,8 +213,8 @@ export function Table<T extends Record<string, any>>({
       </div>
 
       {pagination && (
-        <div className="flex items-center justify-between px-6">
-          <div className="text-sm text-secondary-700 dark:text-secondary-300">
+        <div className="flex flex-col gap-3 px-2 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="text-sm text-secondary-700 dark:text-secondary-300 text-center sm:text-left">
             Showing{' '}
             <span className="font-medium">
               {(pagination.currentPage - 1) * pagination.pageSize + 1}
@@ -207,11 +225,11 @@ export function Table<T extends Record<string, any>>({
             </span>{' '}
             of <span className="font-medium">{pagination.totalItems}</span> results
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <button
               onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
               disabled={pagination.currentPage === 1}
-              className="p-2 rounded-lg border border-secondary-300 dark:border-secondary-700 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg border border-secondary-300 dark:border-secondary-700 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
@@ -246,7 +264,7 @@ export function Table<T extends Record<string, any>>({
                     key={page}
                     onClick={() => pagination.onPageChange(page)}
                     className={cn(
-                      'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                      'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-sm font-medium transition-colors',
                       isCurrentPage
                         ? 'bg-primary-600 text-white'
                         : 'border border-secondary-300 dark:border-secondary-700 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-800'
@@ -260,7 +278,7 @@ export function Table<T extends Record<string, any>>({
             <button
               onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
               disabled={pagination.currentPage === pagination.totalPages}
-              className="p-2 rounded-lg border border-secondary-300 dark:border-secondary-700 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg border border-secondary-300 dark:border-secondary-700 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRightIcon className="h-5 w-5" />
             </button>

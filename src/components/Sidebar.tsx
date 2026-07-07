@@ -40,7 +40,7 @@ interface SidebarProps {
 
 function NavItems({ collapsed }: { collapsed: boolean }) {
   return (
-    <nav aria-label="Main navigation" className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+    <nav aria-label="Main navigation" className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-hide">
       {navigation.map((item) => (
         <NavLink
           key={item.name}
@@ -48,7 +48,7 @@ function NavItems({ collapsed }: { collapsed: boolean }) {
           aria-label={collapsed ? item.name : undefined}
           className={({ isActive }) =>
             cn(
-              'group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150',
+              'group flex items-center rounded-lg px-3 py-3 text-sm font-medium transition-colors duration-150 min-h-[44px]',
               isActive
                 ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
                 : 'text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 dark:text-secondary-300 dark:hover:bg-secondary-800 dark:hover:text-secondary-50',

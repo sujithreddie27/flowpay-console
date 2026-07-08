@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   ResponsiveContainer,
   PieChart,
@@ -110,7 +111,7 @@ function renderCustomLabel({
   );
 }
 
-export function StatusDistributionChart({
+export const StatusDistributionChart = memo(function StatusDistributionChart({
   data,
   loading,
   error,
@@ -155,4 +156,4 @@ export function StatusDistributionChart({
       </ResponsiveContainer>
     </ChartWrapper>
   );
-}
+});

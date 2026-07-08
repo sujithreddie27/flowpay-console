@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -57,7 +58,7 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
-export function TransactionVolumeChart({
+export const TransactionVolumeChart = memo(function TransactionVolumeChart({
   data,
   loading,
   error,
@@ -147,4 +148,4 @@ export function TransactionVolumeChart({
       </ResponsiveContainer>
     </ChartWrapper>
   );
-}
+});

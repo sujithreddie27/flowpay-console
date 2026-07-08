@@ -31,3 +31,9 @@ export type { RetryErrorProps } from './RetryError';
 
 export { LiveIndicator } from './LiveIndicator';
 export type { LiveIndicatorProps, LiveIndicatorStatus } from './LiveIndicator';
+
+export { OptimizedImage } from './OptimizedImage';
+export type { OptimizedImageProps } from './OptimizedImage';
+
+export { VirtualizedList, VirtualizedTable } from './VirtualizedList';
+export type { VirtualizedListProps, VirtualizedTableProps } from './VirtualizedList';

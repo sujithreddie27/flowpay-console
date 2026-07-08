@@ -1,4 +1,4 @@
-import { Fragment, useState, useRef } from 'react';
+import { Fragment, useState, useRef, memo } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import {
   Bars3Icon,
@@ -14,7 +14,7 @@ interface HeaderProps {
   onMenuClick: () => void;
 }
 
-export function Header({ onMenuClick }: HeaderProps) {
+export const Header = memo(function Header({ onMenuClick }: HeaderProps) {
   const [isDark, setIsDark] = useState(
     document.documentElement.classList.contains('dark')
   );
@@ -271,4 +271,4 @@ export function Header({ onMenuClick }: HeaderProps) {
       </div>
     </header>
   );
-}
+});

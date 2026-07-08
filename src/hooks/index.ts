@@ -7,6 +7,9 @@ export { useKeyboardShortcuts } from './useKeyboardShortcuts';
 export { useUnsavedChanges } from './useUnsavedChanges';
 export { useInfiniteScroll } from './useInfiniteScroll';
 
+// Performance Hooks
+export { useStableCallback, useDebouncedValue, useDeepMemo, useCurrencyFormatter, useDateFormatter } from './usePerformance';
+
 // API Hooks
 export * from './useAuth';
 export * from './useAccounts';

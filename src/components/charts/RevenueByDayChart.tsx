@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -55,7 +56,7 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
-export function RevenueByDayChart({
+export const RevenueByDayChart = memo(function RevenueByDayChart({
   data,
   loading,
   error,
@@ -121,4 +122,4 @@ export function RevenueByDayChart({
       </ResponsiveContainer>
     </ChartWrapper>
   );
-}
+});

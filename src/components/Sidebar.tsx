@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, memo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Dialog, Transition } from '@headlessui/react';
 import {
@@ -38,7 +38,7 @@ interface SidebarProps {
   onToggleCollapse: () => void;
 }
 
-function NavItems({ collapsed }: { collapsed: boolean }) {
+const NavItems = memo(function NavItems({ collapsed }: { collapsed: boolean }) {
   return (
     <nav aria-label="Main navigation" className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-hide">
       {navigation.map((item) => (
@@ -74,9 +74,9 @@ function NavItems({ collapsed }: { collapsed: boolean }) {
       ))}
     </nav>
   );
-}
+});
 
-export function Sidebar({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProps) {
+export const Sidebar = memo(function Sidebar({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProps) {
   return (
     <>
       {/* Mobile sidebar */}
@@ -211,4 +211,4 @@ export function Sidebar({ isOpen, isCollapsed, onClose, onToggleCollapse }: Side
       </div>
     </>
   );
-}
+});

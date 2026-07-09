@@ -9,7 +9,7 @@ import { ShieldExclamationIcon, HomeIcon } from '@heroicons/react/24/outline';
  */
 export const UnauthorizedPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-secondary-50 dark:bg-secondary-950 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full text-center">
         {/* Unauthorized Icon */}
         <div className="mb-8 flex justify-center">
@@ -18,10 +18,10 @@ export const UnauthorizedPage = () => {
         
         {/* Error Message */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
             Access Denied
           </h2>
-          <p className="text-gray-600">
+          <p className="text-secondary-600 dark:text-secondary-400">
             You don't have permission to access this page. 
             Please contact your administrator if you believe this is an error.
           </p>

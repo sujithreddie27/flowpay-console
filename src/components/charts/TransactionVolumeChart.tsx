@@ -88,7 +88,7 @@ export const TransactionVolumeChart = memo(function TransactionVolumeChart({
           <XAxis
             dataKey="date"
             tickFormatter={formatDate}
-            tick={{ fontSize: 12, fill: '#94a3b8' }}
+            tick={{ fontSize: 12, fill: 'var(--chart-text, #94a3b8)' }}
             axisLine={false}
             tickLine={false}
             dy={8}
@@ -97,7 +97,7 @@ export const TransactionVolumeChart = memo(function TransactionVolumeChart({
             yAxisId="volume"
             orientation="left"
             tickFormatter={formatVolume}
-            tick={{ fontSize: 12, fill: '#94a3b8' }}
+            tick={{ fontSize: 12, fill: 'var(--chart-text, #94a3b8)' }}
             axisLine={false}
             tickLine={false}
             width={60}
@@ -105,7 +105,7 @@ export const TransactionVolumeChart = memo(function TransactionVolumeChart({
           <YAxis
             yAxisId="count"
             orientation="right"
-            tick={{ fontSize: 12, fill: '#94a3b8' }}
+            tick={{ fontSize: 12, fill: 'var(--chart-text, #94a3b8)' }}
             axisLine={false}
             tickLine={false}
             width={40}

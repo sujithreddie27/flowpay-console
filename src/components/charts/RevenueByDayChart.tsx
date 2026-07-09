@@ -86,19 +86,19 @@ export const RevenueByDayChart = memo(function RevenueByDayChart({
           <XAxis
             dataKey="date"
             tickFormatter={formatDate}
-            tick={{ fontSize: 12, fill: '#94a3b8' }}
+            tick={{ fontSize: 12, fill: 'var(--chart-text, #94a3b8)' }}
             axisLine={false}
             tickLine={false}
             dy={8}
           />
           <YAxis
             tickFormatter={formatRevenue}
-            tick={{ fontSize: 12, fill: '#94a3b8' }}
+            tick={{ fontSize: 12, fill: 'var(--chart-text, #94a3b8)' }}
             axisLine={false}
             tickLine={false}
             width={60}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(14, 165, 233, 0.06)' }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--chart-cursor, rgba(14, 165, 233, 0.06))' }} />
           <Legend
             verticalAlign="top"
             align="right"

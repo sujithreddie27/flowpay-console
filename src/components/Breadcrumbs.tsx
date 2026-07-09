@@ -92,11 +92,11 @@ export const Breadcrumbs = () => {
   }
   
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
+    <nav className="flex items-center space-x-2 text-sm text-secondary-500 dark:text-secondary-400 mb-4" aria-label="Breadcrumb">
       {/* Home Link */}
       <Link
         to="/"
-        className="hover:text-gray-700 transition-colors"
+        className="hover:text-secondary-700 dark:hover:text-secondary-200 transition-colors"
         aria-label="Home"
       >
         <HomeIcon className="h-5 w-5" />
@@ -108,17 +108,17 @@ export const Breadcrumbs = () => {
         
         return (
           <div key={breadcrumb.path} className="flex items-center space-x-2">
-            <ChevronRightIcon className="h-4 w-4 text-gray-400" />
+            <ChevronRightIcon className="h-4 w-4 text-secondary-400 dark:text-secondary-500" />
             
             {isLast ? (
-              <span className="font-medium text-gray-900" aria-current="page">
+              <span className="font-medium text-secondary-900 dark:text-white" aria-current="page">
                 {breadcrumb.label}
               </span>
             ) : (
               <Link
                 to={breadcrumb.path}
                 className={cn(
-                  'hover:text-gray-700 transition-colors',
+                  'hover:text-secondary-700 dark:hover:text-secondary-200 transition-colors',
                   'truncate max-w-[200px]'
                 )}
               >

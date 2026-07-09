@@ -5,6 +5,9 @@ export { MainLayout, AuthLayout } from './layouts';
 export { ProtectedRoute, RoleBasedRoute } from './routes';
 export { Breadcrumbs } from './Breadcrumbs';
 
+// Theme
+export { ThemeProvider, useThemeContext } from './ThemeProvider';
+
 // Error Handling
 export { ErrorBoundary } from './ErrorBoundary';
 

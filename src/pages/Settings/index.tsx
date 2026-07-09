@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Breadcrumbs, Button, Input, Card, Modal, ModalHeader, ModalBody, ModalFooter, Badge, useToast } from '@/components';
+import { Breadcrumbs, Button, Input, Card, Modal, ModalHeader, ModalBody, ModalFooter, Badge, useToast, useThemeContext } from '@/components';
 import {
   Cog6ToothIcon,
   UserCircleIcon,
@@ -15,6 +15,9 @@ import {
   PlusIcon,
   EyeIcon,
   EyeSlashIcon,
+  SunIcon,
+  MoonIcon,
+  ComputerDesktopIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { cn } from '@/utils';
@@ -83,7 +86,7 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 // Tab Navigation
 // ============================================================================
 
-type SettingsTab = 'profile' | 'security' | 'notifications' | 'payment-methods' | 'limits';
+type SettingsTab = 'profile' | 'security' | 'notifications' | 'payment-methods' | 'limits' | 'appearance';
 
 const tabs: { id: SettingsTab; label: string; icon: typeof UserCircleIcon }[] = [
   { id: 'profile', label: 'Profile', icon: UserCircleIcon },
@@ -91,6 +94,7 @@ const tabs: { id: SettingsTab; label: string; icon: typeof UserCircleIcon }[] = 
   { id: 'notifications', label: 'Notifications', icon: BellIcon },
   { id: 'payment-methods', label: 'Payment Methods', icon: CreditCardIcon },
   { id: 'limits', label: 'Transaction Limits', icon: BanknotesIcon },
+  { id: 'appearance', label: 'Appearance', icon: SunIcon },
 ];
 
 // ============================================================================
@@ -133,8 +137,8 @@ const ProfileSection = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Profile Settings</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">Profile Settings</h2>
+        <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
           Update your personal information and contact details.
         </p>
       </div>
@@ -195,15 +199,15 @@ const ProfileSection = () => {
 
 const ProfileSkeleton = () => (
   <div className="space-y-6 animate-pulse">
-    <div className="h-6 bg-gray-200 rounded w-40" />
-    <div className="h-4 bg-gray-100 rounded w-64" />
+    <div className="h-6 bg-secondary-200 dark:bg-secondary-700 rounded w-40" />
+    <div className="h-4 bg-secondary-100 dark:bg-secondary-800 rounded w-64" />
     <div className="grid grid-cols-2 gap-5">
-      <div className="h-10 bg-gray-100 rounded" />
-      <div className="h-10 bg-gray-100 rounded" />
+      <div className="h-10 bg-secondary-100 dark:bg-secondary-800 rounded" />
+      <div className="h-10 bg-secondary-100 dark:bg-secondary-800 rounded" />
     </div>
     <div className="grid grid-cols-2 gap-5">
-      <div className="h-10 bg-gray-100 rounded" />
-      <div className="h-10 bg-gray-100 rounded" />
+      <div className="h-10 bg-secondary-100 dark:bg-secondary-800 rounded" />
+      <div className="h-10 bg-secondary-100 dark:bg-secondary-800 rounded" />
     </div>
   </div>
 );
@@ -240,15 +244,15 @@ const SecuritySection = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Security Settings</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">Security Settings</h2>
+        <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
           Manage your password and two-factor authentication.
         </p>
       </div>
 
       {/* Change Password */}
       <Card padding="md">
-        <h3 className="text-base font-medium text-gray-900 mb-4">Change Password</h3>
+        <h3 className="text-base font-medium text-secondary-900 dark:text-white mb-4">Change Password</h3>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="relative">
             <Input
@@ -260,7 +264,7 @@ const SecuritySection = () => {
             />
             <button
               type="button"
-              className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-8 text-secondary-400 dark:text-secondary-500 hover:text-secondary-600 dark:text-secondary-300"
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
             >
               {showCurrentPassword ? (
@@ -281,7 +285,7 @@ const SecuritySection = () => {
             />
             <button
               type="button"
-              className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-8 text-secondary-400 dark:text-secondary-500 hover:text-secondary-600 dark:text-secondary-300"
               onClick={() => setShowNewPassword(!showNewPassword)}
             >
               {showNewPassword ? (
@@ -300,7 +304,7 @@ const SecuritySection = () => {
             placeholder="Confirm new password"
           />
 
-          <div className="text-xs text-gray-500 space-y-1">
+          <div className="text-xs text-secondary-500 dark:text-secondary-400 space-y-1">
             <p>Password requirements:</p>
             <ul className="list-disc list-inside space-y-0.5">
               <li>Minimum 8 characters</li>
@@ -319,10 +323,10 @@ const SecuritySection = () => {
       <Card padding="md">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-medium text-gray-900">
+            <h3 className="text-base font-medium text-secondary-900 dark:text-white">
               Two-Factor Authentication
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
               Add an extra layer of security to your account using an authenticator app.
             </p>
           </div>
@@ -339,18 +343,18 @@ const SecuritySection = () => {
       <Card padding="md">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-medium text-gray-900">Active Sessions</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <h3 className="text-base font-medium text-secondary-900 dark:text-white">Active Sessions</h3>
+            <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
               Manage your active sessions across devices.
             </p>
           </div>
           <Badge variant="info">Current Session</Badge>
         </div>
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+        <div className="mt-4 p-3 bg-secondary-50 dark:bg-secondary-800 rounded-lg border border-secondary-100 dark:border-secondary-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">This Device</p>
-              <p className="text-xs text-gray-500">Active now</p>
+              <p className="text-sm font-medium text-secondary-900 dark:text-white">This Device</p>
+              <p className="text-xs text-secondary-500 dark:text-secondary-400">Active now</p>
             </div>
             <div className="w-2 h-2 rounded-full bg-green-500" />
           </div>
@@ -402,15 +406,15 @@ const NotificationsSection = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Notification Preferences</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">Notification Preferences</h2>
+        <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
           Choose how you want to be notified about activity on your account.
         </p>
       </div>
 
       {/* Email Notifications */}
       <Card padding="md">
-        <h3 className="text-base font-medium text-gray-900 mb-4">Email Notifications</h3>
+        <h3 className="text-base font-medium text-secondary-900 dark:text-white mb-4">Email Notifications</h3>
         <div className="space-y-4">
           <ToggleRow
             label="Transaction Alerts"
@@ -445,7 +449,7 @@ const NotificationsSection = () => {
 
       {/* Push Notifications */}
       <Card padding="md">
-        <h3 className="text-base font-medium text-gray-900 mb-4">Push Notifications</h3>
+        <h3 className="text-base font-medium text-secondary-900 dark:text-white mb-4">Push Notifications</h3>
         <div className="space-y-4">
           <ToggleRow
             label="Transaction Alerts"
@@ -473,7 +477,7 @@ const NotificationsSection = () => {
 
       {/* SMS Notifications */}
       <Card padding="md">
-        <h3 className="text-base font-medium text-gray-900 mb-4">SMS Notifications</h3>
+        <h3 className="text-base font-medium text-secondary-900 dark:text-white mb-4">SMS Notifications</h3>
         <div className="space-y-4">
           <ToggleRow
             label="Transaction Alerts"
@@ -497,13 +501,13 @@ const NotificationsSection = () => {
 
 const NotificationsSkeleton = () => (
   <div className="space-y-6 animate-pulse">
-    <div className="h-6 bg-gray-200 rounded w-48" />
-    <div className="h-4 bg-gray-100 rounded w-80" />
+    <div className="h-6 bg-secondary-200 dark:bg-secondary-700 rounded w-48" />
+    <div className="h-4 bg-secondary-100 dark:bg-secondary-800 rounded w-80" />
     {[1, 2, 3].map((i) => (
-      <div key={i} className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
-        <div className="h-5 bg-gray-200 rounded w-36" />
-        <div className="h-10 bg-gray-100 rounded" />
-        <div className="h-10 bg-gray-100 rounded" />
+      <div key={i} className="bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 rounded-lg p-6 space-y-4">
+        <div className="h-5 bg-secondary-200 dark:bg-secondary-700 rounded w-36" />
+        <div className="h-10 bg-secondary-100 dark:bg-secondary-800 rounded" />
+        <div className="h-10 bg-secondary-100 dark:bg-secondary-800 rounded" />
       </div>
     ))}
   </div>
@@ -524,8 +528,8 @@ interface ToggleRowProps {
 const ToggleRow = ({ label, description, checked, onChange, disabled }: ToggleRowProps) => (
   <div className="flex items-center justify-between py-2">
     <div className="flex-1 mr-4">
-      <p className="text-sm font-medium text-gray-900">{label}</p>
-      <p className="text-xs text-gray-500">{description}</p>
+      <p className="text-sm font-medium text-secondary-900 dark:text-white">{label}</p>
+      <p className="text-xs text-secondary-500 dark:text-secondary-400">{description}</p>
     </div>
     <button
       type="button"
@@ -535,7 +539,7 @@ const ToggleRow = ({ label, description, checked, onChange, disabled }: ToggleRo
       onClick={() => onChange(!checked)}
       className={cn(
         'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
-        checked ? 'bg-primary-600' : 'bg-gray-200',
+        checked ? 'bg-primary-600' : 'bg-secondary-200 dark:bg-secondary-700',
         disabled && 'opacity-50 cursor-not-allowed'
       )}
     >
@@ -592,8 +596,8 @@ const PaymentMethodsSection = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Payment Methods</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">Payment Methods</h2>
+          <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
             Manage your saved cards, bank accounts, and UPI IDs.
           </p>
         </div>
@@ -622,9 +626,9 @@ const PaymentMethodsSection = () => {
       ) : (
         <Card padding="lg">
           <div className="text-center py-8">
-            <CreditCardIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-sm font-medium text-gray-900">No payment methods</h3>
-            <p className="text-sm text-gray-500 mt-1">
+            <CreditCardIcon className="h-12 w-12 text-secondary-300 dark:text-secondary-600 mx-auto mb-3" />
+            <h3 className="text-sm font-medium text-secondary-900 dark:text-white">No payment methods</h3>
+            <p className="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
               Add a card, bank account, or UPI ID to get started.
             </p>
             <Button
@@ -654,8 +658,8 @@ const PaymentMethodsSection = () => {
                   className={cn(
                     'flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors',
                     addType === type
-                      ? 'border-primary-500 bg-primary-50 text-primary-700'
-                      : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700 dark:border-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
+                      : 'border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-700'
                   )}
                 >
                   {type === 'card' && 'Card'}
@@ -708,7 +712,7 @@ const PaymentMethodsSection = () => {
       >
         <ModalHeader>Remove Payment Method</ModalHeader>
         <ModalBody>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-secondary-600 dark:text-secondary-300">
             Are you sure you want to remove this payment method ending in{' '}
             <span className="font-medium">{showRemoveModal?.last4}</span>? This action
             cannot be undone.
@@ -761,7 +765,7 @@ const PaymentMethodCard = ({
           </div>
         );
       default:
-        return <CreditCardIcon className="h-8 w-8 text-gray-400" />;
+        return <CreditCardIcon className="h-8 w-8 text-secondary-400 dark:text-secondary-500" />;
     }
   };
 
@@ -786,14 +790,14 @@ const PaymentMethodCard = ({
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-white hover:border-gray-300 transition-colors">
+    <div className="flex items-center justify-between p-4 border border-secondary-200 dark:border-secondary-700 rounded-lg bg-white dark:bg-secondary-800 hover:border-secondary-300 dark:hover:border-secondary-600 transition-colors">
       <div className="flex items-center gap-4">
         {getIcon()}
         <div>
-          <p className="text-sm font-medium text-gray-900">{getLabel()}</p>
+          <p className="text-sm font-medium text-secondary-900 dark:text-white">{getLabel()}</p>
           <div className="flex items-center gap-2 mt-0.5">
             {getExpiry() && (
-              <span className="text-xs text-gray-500">{getExpiry()}</span>
+              <span className="text-xs text-secondary-500 dark:text-secondary-400">{getExpiry()}</span>
             )}
             {method.isDefault && (
               <Badge variant="success" className="text-xs">Default</Badge>
@@ -808,7 +812,7 @@ const PaymentMethodCard = ({
             type="button"
             onClick={onSetDefault}
             disabled={isSettingDefault}
-            className="p-2 text-gray-400 hover:text-yellow-500 transition-colors rounded-lg hover:bg-gray-50"
+            className="p-2 text-secondary-400 dark:text-secondary-500 hover:text-yellow-500 transition-colors rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-800"
             title="Set as default"
           >
             <StarIcon className="h-5 w-5" />
@@ -822,7 +826,7 @@ const PaymentMethodCard = ({
         <button
           type="button"
           onClick={onRemove}
-          className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-gray-50"
+          className="p-2 text-secondary-400 dark:text-secondary-500 hover:text-red-500 transition-colors rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-800"
           title="Remove"
         >
           <TrashIcon className="h-5 w-5" />
@@ -1012,11 +1016,11 @@ const AddUpiForm = ({ onSuccess, onError, addMethod }: AddFormProps) => {
 const PaymentMethodsSkeleton = () => (
   <div className="space-y-6 animate-pulse">
     <div className="flex items-center justify-between">
-      <div className="h-6 bg-gray-200 rounded w-40" />
-      <div className="h-8 bg-gray-200 rounded w-24" />
+      <div className="h-6 bg-secondary-200 dark:bg-secondary-700 rounded w-40" />
+      <div className="h-8 bg-secondary-200 dark:bg-secondary-700 rounded w-24" />
     </div>
     {[1, 2, 3].map((i) => (
-      <div key={i} className="h-16 bg-gray-100 border border-gray-200 rounded-lg" />
+      <div key={i} className="h-16 bg-secondary-100 dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 rounded-lg" />
     ))}
   </div>
 );
@@ -1060,8 +1064,8 @@ const TransactionLimitsSection = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Transaction Limits</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">Transaction Limits</h2>
+        <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
           View your current transaction limits and usage. Contact support to request limit increases.
         </p>
       </div>
@@ -1071,15 +1075,15 @@ const TransactionLimitsSection = () => {
           <Card key={limit.label} padding="md">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <p className="text-sm font-medium text-gray-900">{limit.label}</p>
-                <p className="text-xs text-gray-500">{limit.period}</p>
+                <p className="text-sm font-medium text-secondary-900 dark:text-white">{limit.label}</p>
+                <p className="text-xs text-secondary-500 dark:text-secondary-400">{limit.period}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-semibold text-gray-900">{limit.amount}</p>
-                <p className="text-xs text-gray-500">Used: {limit.used}</p>
+                <p className="text-sm font-semibold text-secondary-900 dark:text-white">{limit.amount}</p>
+                <p className="text-xs text-secondary-500 dark:text-secondary-400">Used: {limit.used}</p>
               </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
               <div
                 className={cn(
                   'h-2 rounded-full transition-all',
@@ -1092,19 +1096,19 @@ const TransactionLimitsSection = () => {
                 style={{ width: `${limit.percentage}%` }}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1 text-right">
+            <p className="text-xs text-secondary-500 dark:text-secondary-400 mt-1 text-right">
               {limit.percentage}% utilized
             </p>
           </Card>
         ))}
       </div>
 
-      <Card padding="md" className="bg-blue-50 border-blue-200">
+      <Card padding="md" className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
         <div className="flex items-start gap-3">
-          <InformationIcon className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+          <InformationIcon className="h-5 w-5 text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-blue-900">Need higher limits?</p>
-            <p className="text-sm text-blue-700 mt-0.5">
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-200">Need higher limits?</p>
+            <p className="text-sm text-blue-700 dark:text-blue-300 mt-0.5">
               Contact support or your account manager to request a limit increase.
               Higher limits may require additional KYC verification.
             </p>
@@ -1120,6 +1124,98 @@ const InformationIcon = ({ className }: { className?: string }) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
   </svg>
 );
+
+// ============================================================================
+// Appearance Section
+// ============================================================================
+
+const AppearanceSection = () => {
+  const { theme, setTheme, isDark } = useThemeContext();
+
+  const themeOptions: { id: 'light' | 'dark' | 'system'; label: string; description: string; icon: typeof SunIcon }[] = [
+    { id: 'light', label: 'Light', description: 'Always use light theme', icon: SunIcon },
+    { id: 'dark', label: 'Dark', description: 'Always use dark theme', icon: MoonIcon },
+    { id: 'system', label: 'System', description: 'Follow your system preference', icon: ComputerDesktopIcon },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">Appearance</h2>
+        <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
+          Customize how FlowPay looks on your device.
+        </p>
+      </div>
+
+      <Card padding="md">
+        <h3 className="text-base font-medium text-secondary-900 dark:text-white mb-4">Theme</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {themeOptions.map((option) => {
+            const Icon = option.icon;
+            const isSelected = theme === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setTheme(option.id)}
+                className={cn(
+                  'flex flex-col items-center gap-3 rounded-xl border-2 p-4 transition-all',
+                  isSelected
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 ring-1 ring-primary-500'
+                    : 'border-secondary-200 dark:border-secondary-700 hover:border-secondary-300 dark:hover:border-secondary-600 hover:bg-secondary-50 dark:hover:bg-secondary-800'
+                )}
+              >
+                <div className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-lg',
+                  isSelected
+                    ? 'bg-primary-100 dark:bg-primary-900/40'
+                    : 'bg-secondary-100 dark:bg-secondary-800'
+                )}>
+                  <Icon className={cn(
+                    'h-5 w-5',
+                    isSelected
+                      ? 'text-primary-600 dark:text-primary-400'
+                      : 'text-secondary-500 dark:text-secondary-400'
+                  )} />
+                </div>
+                <div className="text-center">
+                  <p className={cn(
+                    'text-sm font-medium',
+                    isSelected
+                      ? 'text-primary-700 dark:text-primary-300'
+                      : 'text-secondary-900 dark:text-white'
+                  )}>
+                    {option.label}
+                  </p>
+                  <p className="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
+                    {option.description}
+                  </p>
+                </div>
+                {isSelected && (
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary-500" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </Card>
+
+      <Card padding="md">
+        <h3 className="text-base font-medium text-secondary-900 dark:text-white mb-2">Preview</h3>
+        <p className="text-sm text-secondary-500 dark:text-secondary-400 mb-4">
+          Currently using <span className="font-medium text-secondary-900 dark:text-white">{isDark ? 'dark' : 'light'}</span> mode
+          {theme === 'system' && ' (following system preference)'}.
+        </p>
+        <div className="flex items-center gap-4">
+          <div className="flex-1 rounded-lg bg-secondary-100 dark:bg-secondary-800 p-3 border border-secondary-200 dark:border-secondary-700">
+            <div className="h-2 w-3/4 rounded bg-secondary-300 dark:bg-secondary-600 mb-2" />
+            <div className="h-2 w-1/2 rounded bg-secondary-200 dark:bg-secondary-700" />
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+};
 
 // ============================================================================
 // Settings Page (Main Export)
@@ -1140,6 +1236,8 @@ export const SettingsPage = () => {
         return <PaymentMethodsSection />;
       case 'limits':
         return <TransactionLimitsSection />;
+      case 'appearance':
+        return <AppearanceSection />;
       default:
         return null;
     }
@@ -1153,10 +1251,10 @@ export const SettingsPage = () => {
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-2">
-            <Cog6ToothIcon className="h-8 w-8 text-gray-400" />
-            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+            <Cog6ToothIcon className="h-8 w-8 text-secondary-400 dark:text-secondary-500" />
+            <h1 className="text-3xl font-bold text-secondary-900 dark:text-white">Settings</h1>
           </div>
-          <p className="text-gray-600">
+          <p className="text-secondary-600 dark:text-secondary-300">
             Manage your account settings and preferences
           </p>
         </div>
@@ -1177,7 +1275,7 @@ export const SettingsPage = () => {
                         'flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium rounded-lg w-full whitespace-nowrap transition-colors',
                         activeTab === tab.id
                           ? 'bg-primary-50 text-primary-700 border border-primary-200'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                          : 'text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:text-white hover:bg-secondary-50 dark:bg-secondary-800'
                       )}
                     >
                       <Icon className="h-5 w-5 flex-shrink-0" />
@@ -1191,7 +1289,7 @@ export const SettingsPage = () => {
 
           {/* Content Area */}
           <div className="flex-1 min-w-0">
-            <div className="bg-white border border-gray-200 rounded-xl p-6 lg:p-8">
+            <div className="bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 rounded-xl p-6 lg:p-8">
               {renderSection()}
             </div>
           </div>

@@ -7,6 +7,22 @@
     @apply border-secondary-200 dark:border-secondary-700;
   }
 
+  :root {
+    --chart-grid: #e2e8f0;
+    --chart-text: #64748b;
+    --chart-tooltip-bg: #ffffff;
+    --chart-tooltip-border: #e2e8f0;
+    --chart-cursor: rgba(14, 165, 233, 0.06);
+  }
+
+  .dark {
+    --chart-grid: #334155;
+    --chart-text: #94a3b8;
+    --chart-tooltip-bg: #1e293b;
+    --chart-tooltip-border: #334155;
+    --chart-cursor: rgba(14, 165, 233, 0.12);
+  }
+
   html {
     @apply antialiased;
     -webkit-tap-highlight-color: transparent;

@@ -6,18 +6,19 @@ import {
   MagnifyingGlassIcon,
   MoonIcon,
   SunIcon,
+  ComputerDesktopIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/utils';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useThemeContext } from '@/components/ThemeProvider';
+import type { Theme } from '@/hooks/useTheme';
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 export const Header = memo(function Header({ onMenuClick }: HeaderProps) {
-  const [isDark, setIsDark] = useState(
-    document.documentElement.classList.contains('dark')
-  );
+  const { theme, isDark, setTheme } = useThemeContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -46,9 +47,11 @@ export const Header = memo(function Header({ onMenuClick }: HeaderProps) {
     },
   ]);
 
-  const toggleTheme = () => {
-    document.documentElement.classList.toggle('dark');
-    setIsDark(!isDark);
+  const cycleTheme = () => {
+    const modes: Theme[] = ['light', 'dark', 'system'];
+    const currentIndex = modes.indexOf(theme);
+    const nextTheme = modes[(currentIndex + 1) % modes.length];
+    setTheme(nextTheme);
   };
 
   return (
@@ -95,13 +98,21 @@ export const Header = memo(function Header({ onMenuClick }: HeaderProps) {
           {/* Theme toggle */}
           <button
             type="button"
-            onClick={toggleTheme}
-            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-            aria-pressed={isDark}
+            onClick={cycleTheme}
+            aria-label={
+              theme === 'system'
+                ? 'Using system theme, click to switch to light'
+                : theme === 'light'
+                ? 'Light mode, click to switch to dark'
+                : 'Dark mode, click to switch to system'
+            }
+            title={`Theme: ${theme}`}
             className="p-2 rounded-lg text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100 dark:text-secondary-400 dark:hover:text-secondary-200 dark:hover:bg-secondary-800 transition-colors"
           >
-            <span className="sr-only">Toggle theme</span>
-            {isDark ? (
+            <span className="sr-only">Toggle theme ({theme})</span>
+            {theme === 'system' ? (
+              <ComputerDesktopIcon className="h-5 w-5" />
+            ) : isDark ? (
               <SunIcon className="h-5 w-5" />
             ) : (
               <MoonIcon className="h-5 w-5" />

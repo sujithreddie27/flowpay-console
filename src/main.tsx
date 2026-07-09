@@ -6,12 +6,15 @@ import './index.css';
 import { QueryClientProvider, queryClient } from '@/services';
 import { store } from '@/store';
 import { reportWebVitals } from '@/utils';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
       </QueryClientProvider>
     </Provider>
   </React.StrictMode>,

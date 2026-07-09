@@ -1,6 +1,8 @@
 export { useMediaQuery } from './useMediaQuery';
 export { useSidebarState } from './useSidebarState';
 export { useSwipeGesture } from './useSwipeGesture';
+export { useTheme } from './useTheme';
+export type { Theme } from './useTheme';
 
 // UX Hooks
 export { useKeyboardShortcuts } from './useKeyboardShortcuts';

@@ -9,19 +9,19 @@ import { HomeIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
  */
 export const NotFoundPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-secondary-50 dark:bg-secondary-950 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full text-center">
         {/* 404 Illustration */}
         <div className="mb-8">
-          <h1 className="text-9xl font-bold text-gray-200">404</h1>
+          <h1 className="text-9xl font-bold text-secondary-200 dark:text-secondary-800">404</h1>
         </div>
         
         {/* Error Message */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-bold text-secondary-900 dark:text-white mb-2">
             Page Not Found
           </h2>
-          <p className="text-gray-600">
+          <p className="text-secondary-600 dark:text-secondary-400">
             Sorry, we couldn't find the page you're looking for. 
             It might have been moved or doesn't exist.
           </p>
@@ -38,7 +38,7 @@ export const NotFoundPage = () => {
           </Link>
           <button
             onClick={() => window.history.back()}
-            className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center justify-center px-6 py-3 border border-secondary-300 dark:border-secondary-600 text-base font-medium rounded-md text-secondary-700 dark:text-secondary-300 bg-white dark:bg-secondary-800 hover:bg-secondary-50 dark:bg-secondary-950 transition-colors"
           >
             <ArrowLeftIcon className="h-5 w-5 mr-2" />
             Go Back
@@ -47,7 +47,7 @@ export const NotFoundPage = () => {
         
         {/* Help Text */}
         <div className="mt-8">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-secondary-500 dark:text-secondary-400">
             If you believe this is an error, please contact support.
           </p>
         </div>

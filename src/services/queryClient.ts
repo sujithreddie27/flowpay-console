@@ -17,9 +17,10 @@ const defaultQueryOptions = {
     gcTime: 10 * 60 * 1000,
 
     // Retry failed requests 3 times with exponential backoff
-    retry: (failureCount: number, error: ApiError) => {
+    retry: (failureCount: number, error: Error) => {
       // Don't retry on 4xx errors (client errors)
-      if (error.error?.code.startsWith('HTTP_4')) {
+      const apiError = error as unknown as ApiError;
+      if (apiError.error?.code?.startsWith('HTTP_4')) {
         return false;
       }
       // Retry up to 3 times for other errors

@@ -12,12 +12,8 @@
 import { useEffect } from 'react';
 import {
   // Services (direct API calls)
-  authService,
   accountService,
   transactionService,
-  paymentService,
-  dashboardService,
-  settingsService,
   
   // React Query utilities
   queryKeys,
@@ -26,7 +22,6 @@ import {
   // Token management
   tokenManager,
   isAuthenticated,
-  logout,
 } from '@/services';
 
 import {
@@ -270,7 +265,7 @@ export const TransactionStatusMonitorExample = ({ transactionId }: { transaction
   
   // Poll transaction status every 5 seconds if pending
   const { data: status } = useTransactionStatus(transactionId, {
-    refetchInterval: transaction?.status === 'pending' ? 5000 : false,
+    refetchInterval: transaction?.status === 'pending' ? 5000 : undefined,
   });
 
   return (
@@ -371,7 +366,7 @@ export const TokenManagementExample = () => {
 // ============================================================================
 
 export const ErrorHandlingExample = () => {
-  const { data, isLoading, error, isError } = useAccounts();
+  const { isLoading, error, isError } = useAccounts();
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -379,14 +374,15 @@ export const ErrorHandlingExample = () => {
 
   if (isError) {
     // error is typed as ApiError
+    const apiError = error as unknown as { error: { code: string; message: string; details?: unknown } };
     return (
       <div>
         <h3>Error</h3>
-        <p>Code: {error.error.code}</p>
-        <p>Message: {error.error.message}</p>
-        {error.error.details && (
-          <pre>{JSON.stringify(error.error.details, null, 2)}</pre>
-        )}
+        <p>Code: {apiError.error.code}</p>
+        <p>Message: {apiError.error.message}</p>
+        {apiError.error.details ? (
+          <pre>{String(JSON.stringify(apiError.error.details, null, 2))}</pre>
+        ) : null}
       </div>
     );
   }

@@ -31,7 +31,7 @@ const registerSchema = z
       .string()
       .min(1, 'Phone number is required')
       .regex(
-        /^[\d\s()+\-]+$/,
+        /^[\d\s()+-]+$/,
         'Please enter a valid phone number'
       )
       .min(10, 'Phone number must be at least 10 digits'),

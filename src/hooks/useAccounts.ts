@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   accountService,
   queryKeys,
@@ -84,8 +84,6 @@ export const useAccountTransactions = (
  * Hook for creating new account
  */
 export const useCreateAccount = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (accountData: CreateAccountRequest) =>
       accountService.createAccount(accountData),
@@ -100,8 +98,6 @@ export const useCreateAccount = () => {
  * Hook for updating account
  */
 export const useUpdateAccount = (accountId: string) => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (updates: UpdateAccountRequest) =>
       accountService.updateAccount(accountId, updates),
@@ -117,8 +113,6 @@ export const useUpdateAccount = (accountId: string) => {
  * Hook for deleting/closing account
  */
 export const useDeleteAccount = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (accountId: string) => accountService.deleteAccount(accountId),
     onSuccess: () => {
@@ -132,12 +126,10 @@ export const useDeleteAccount = () => {
  * Hook for freezing account
  */
 export const useFreezeAccount = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ accountId, reason }: { accountId: string; reason?: string }) =>
       accountService.freezeAccount(accountId, reason),
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidate specific account and accounts list
       invalidateQueries.account(variables.accountId);
       invalidateQueries.accounts();
@@ -149,11 +141,9 @@ export const useFreezeAccount = () => {
  * Hook for unfreezing account
  */
 export const useUnfreezeAccount = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (accountId: string) => accountService.unfreezeAccount(accountId),
-    onSuccess: (data, accountId) => {
+    onSuccess: (_data, accountId) => {
       // Invalidate specific account and accounts list
       invalidateQueries.account(accountId);
       invalidateQueries.accounts();

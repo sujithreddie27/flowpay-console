@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/Modal';
 
@@ -68,7 +68,7 @@ describe('Modal', () => {
 
   it('applies size classes correctly', () => {
     // The lg size should map to max-w-2xl in the Modal component's size config
-    const { container, rerender } = render(
+    render(
       <Modal isOpen={true} onClose={vi.fn()} size="lg">
         <ModalBody>Large modal</ModalBody>
       </Modal>

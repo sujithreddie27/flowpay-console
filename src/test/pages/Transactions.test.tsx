@@ -3,7 +3,6 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../utils';
 import { TransactionsPage } from '@/pages/Transactions';
-import { mockTransactions } from '../mocks/handlers';
 
 // Mock react-router-dom navigate
 const mockNavigate = vi.fn();

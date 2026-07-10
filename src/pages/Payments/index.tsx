@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,7 +10,7 @@ import {
   ExclamationTriangleIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
-import { Button, Input, Modal, ModalHeader, ModalBody, ModalFooter, Badge, LoadingSpinner } from '@/components/ui';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Badge, LoadingSpinner } from '@/components/ui';
 import { useToast } from '@/components/ui/Toast';
 import {
   useInitiatePayment,

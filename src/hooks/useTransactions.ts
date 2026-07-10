@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   transactionService,
   queryKeys,
@@ -99,8 +99,6 @@ export const useTransactionStatistics = (params?: {
  * Hook for initiating new transaction
  */
 export const useInitiateTransaction = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (transactionData: InitiateTransactionRequest) =>
       transactionService.initiateTransaction(transactionData),
@@ -116,12 +114,10 @@ export const useInitiateTransaction = () => {
  * Hook for retrying failed transaction
  */
 export const useRetryTransaction = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (transactionId: string) =>
       transactionService.retryTransaction(transactionId),
-    onSuccess: (data, transactionId) => {
+    onSuccess: (_data, transactionId) => {
       // Invalidate specific transaction and transactions list
       invalidateQueries.transaction(transactionId);
       invalidateQueries.transactions();
@@ -133,12 +129,10 @@ export const useRetryTransaction = () => {
  * Hook for cancelling pending transaction
  */
 export const useCancelTransaction = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ transactionId, reason }: { transactionId: string; reason?: string }) =>
       transactionService.cancelTransaction(transactionId, reason),
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidate specific transaction and transactions list
       invalidateQueries.transaction(variables.transactionId);
       invalidateQueries.transactions();
@@ -150,8 +144,6 @@ export const useCancelTransaction = () => {
  * Hook for reversing completed transaction
  */
 export const useReverseTransaction = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       transactionId,
@@ -162,7 +154,7 @@ export const useReverseTransaction = () => {
       reason: string;
       amount?: number;
     }) => transactionService.reverseTransaction(transactionId, reason, amount),
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidate specific transaction and transactions list
       invalidateQueries.transaction(variables.transactionId);
       invalidateQueries.transactions();

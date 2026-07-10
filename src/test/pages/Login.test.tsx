@@ -55,7 +55,7 @@ describe('Auth Flow - Login Page', () => {
     // The form should show some email-related validation feedback
     await waitFor(() => {
       // Either shows zod's message or the form stays on the page (no redirect)
-      const emailError = screen.queryByText(/email/i);
+      screen.queryByText(/email/i);
       expect(emailInput).toBeInTheDocument(); // Still on login page
     });
   });

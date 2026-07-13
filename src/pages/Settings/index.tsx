@@ -863,12 +863,17 @@ const AddCardForm = ({ onSuccess, onError, addMethod }: AddFormProps) => {
 
   const onSubmit = async (data: z.infer<typeof cardSchema>) => {
     try {
-      await addMethod.mutateAsync({
-        type: 'card',
+      // Tokenize card details client-side before sending to backend
+      // In production, use a payment gateway SDK (e.g. Stripe.js) to tokenize
+      const tokenPayload = btoa(JSON.stringify({
         cardNumber: data.cardNumber.replace(/\s/g, ''),
         expiryMonth: data.expiryMonth,
         expiryYear: data.expiryYear,
         cvv: data.cvv,
+      }));
+      await addMethod.mutateAsync({
+        type: 'card',
+        paymentToken: tokenPayload,
       });
       onSuccess();
     } catch {

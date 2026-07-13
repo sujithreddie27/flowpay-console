@@ -111,7 +111,9 @@ export const useWebSocket = (options: UseWebSocketOptions = {}): UseWebSocketRet
     return () => {
       unsubscribers.forEach((unsub) => unsub());
     };
-  }, [eventTypes.join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Stabilize dependency: only re-subscribe when event type values change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventTypes.join(',')]);
 
   // Auto-connect on mount when authenticated
   useEffect(() => {

@@ -40,17 +40,22 @@ export const settingsService = {
    * Upload profile avatar
    */
   uploadAvatar: async (file: File): Promise<{ avatarUrl: string }> => {
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      throw new Error(`Invalid file type. Allowed: ${ALLOWED_TYPES.join(', ')}`);
+    }
+    if (file.size > MAX_SIZE) {
+      throw new Error('File size exceeds 5MB limit.');
+    }
+
     const formData = new FormData();
     formData.append('avatar', file);
 
     const response = await apiClient.post<ApiResponse<{ avatarUrl: string }>>(
       '/settings/profile/avatar',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      formData
     );
     return response.data.data;
   },
@@ -131,7 +136,7 @@ export const settingsService = {
    * Revoke session
    */
   revokeSession: async (sessionId: string): Promise<void> => {
-    await apiClient.delete(`/settings/security/sessions/${sessionId}`);
+    await apiClient.delete(`/settings/security/sessions/${encodeURIComponent(sessionId)}`);
   },
 
   /**
@@ -227,7 +232,7 @@ export const settingsService = {
    * Revoke API key
    */
   revokeApiKey: async (keyId: string): Promise<void> => {
-    await apiClient.delete(`/settings/api-keys/${keyId}`);
+    await apiClient.delete(`/settings/api-keys/${encodeURIComponent(keyId)}`);
   },
 
   // ============================================================================

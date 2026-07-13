@@ -32,7 +32,7 @@ export const transactionService = {
    */
   getTransactionById: async (transactionId: string): Promise<TransactionDetails> => {
     const response = await apiClient.get<ApiResponse<TransactionDetails>>(
-      `/transactions/${transactionId}`
+      `/transactions/${encodeURIComponent(transactionId)}`
     );
     return response.data.data;
   },
@@ -42,7 +42,7 @@ export const transactionService = {
    */
   getTransactionByReference: async (referenceId: string): Promise<TransactionDetails> => {
     const response = await apiClient.get<ApiResponse<TransactionDetails>>(
-      `/transactions/reference/${referenceId}`
+      `/transactions/reference/${encodeURIComponent(referenceId)}`
     );
     return response.data.data;
   },
@@ -65,7 +65,7 @@ export const transactionService = {
    */
   retryTransaction: async (transactionId: string): Promise<Transaction> => {
     const response = await apiClient.post<ApiResponse<Transaction>>(
-      `/transactions/${transactionId}/retry`
+      `/transactions/${encodeURIComponent(transactionId)}/retry`
     );
     return response.data.data;
   },
@@ -78,7 +78,7 @@ export const transactionService = {
     reason?: string
   ): Promise<Transaction> => {
     const response = await apiClient.post<ApiResponse<Transaction>>(
-      `/transactions/${transactionId}/cancel`,
+      `/transactions/${encodeURIComponent(transactionId)}/cancel`,
       { reason }
     );
     return response.data.data;
@@ -93,7 +93,7 @@ export const transactionService = {
     amount?: number
   ): Promise<Transaction> => {
     const response = await apiClient.post<ApiResponse<Transaction>>(
-      `/transactions/${transactionId}/reverse`,
+      `/transactions/${encodeURIComponent(transactionId)}/reverse`,
       { reason, amount }
     );
     return response.data.data;
@@ -111,7 +111,7 @@ export const transactionService = {
       status: TransactionStatus;
       message?: string;
       updatedAt: string;
-    }>>(`/transactions/${transactionId}/status`);
+    }>>(`/transactions/${encodeURIComponent(transactionId)}/status`);
     return response.data.data;
   },
 
@@ -120,7 +120,7 @@ export const transactionService = {
    */
   getTransactionTimeline: async (transactionId: string): Promise<any[]> => {
     const response = await apiClient.get<ApiResponse<any[]>>(
-      `/transactions/${transactionId}/timeline`
+      `/transactions/${encodeURIComponent(transactionId)}/timeline`
     );
     return response.data.data;
   },
@@ -129,7 +129,7 @@ export const transactionService = {
    * Download transaction receipt (PDF)
    */
   downloadReceipt: async (transactionId: string): Promise<Blob> => {
-    const response = await apiClient.get(`/transactions/${transactionId}/receipt`, {
+    const response = await apiClient.get(`/transactions/${encodeURIComponent(transactionId)}/receipt`, {
       responseType: 'blob',
     });
     return response.data;

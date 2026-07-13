@@ -382,6 +382,7 @@ export function AdminTransactionsPage() {
   const handleSearch = useCallback(() => {
     setSearch(searchInput.trim());
     setPage(1);
+    setSelectedIds([]);
   }, [searchInput]);
 
   const handleSearchKeyDown = useCallback(
@@ -401,6 +402,7 @@ export function AdminTransactionsPage() {
     setSearch('');
     setSearchInput('');
     setPage(1);
+    setSelectedIds([]);
   }, []);
 
   const activeFilterCount = useMemo(() => {

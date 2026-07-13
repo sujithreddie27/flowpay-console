@@ -39,7 +39,7 @@ export const paymentService = {
    */
   getPaymentById: async (paymentId: string): Promise<Payment> => {
     const response = await apiClient.get<ApiResponse<Payment>>(
-      `/payments/${paymentId}`
+      `/payments/${encodeURIComponent(paymentId)}`
     );
     return response.data.data;
   },
@@ -69,7 +69,7 @@ export const paymentService = {
     }
   ): Promise<Payment> => {
     const response = await apiClient.post<ApiResponse<Payment>>(
-      `/payments/${paymentId}/confirm`,
+      `/payments/${encodeURIComponent(paymentId)}/confirm`,
       confirmationData
     );
     return response.data.data;
@@ -80,7 +80,7 @@ export const paymentService = {
    */
   retryPayment: async (retryData: RetryPaymentRequest): Promise<Payment> => {
     const response = await apiClient.post<ApiResponse<Payment>>(
-      `/payments/${retryData.paymentId}/retry`,
+      `/payments/${encodeURIComponent(retryData.paymentId)}/retry`,
       { idempotencyKey: retryData.idempotencyKey }
     );
     return response.data.data;
@@ -91,7 +91,7 @@ export const paymentService = {
    */
   cancelPayment: async (cancelData: CancelPaymentRequest): Promise<Payment> => {
     const response = await apiClient.post<ApiResponse<Payment>>(
-      `/payments/${cancelData.paymentId}/cancel`,
+      `/payments/${encodeURIComponent(cancelData.paymentId)}/cancel`,
       { reason: cancelData.reason }
     );
     return response.data.data;
@@ -109,7 +109,7 @@ export const paymentService = {
     }
   ): Promise<Payment> => {
     const response = await apiClient.post<ApiResponse<Payment>>(
-      `/payments/${paymentId}/refund`,
+      `/payments/${encodeURIComponent(paymentId)}/refund`,
       refundData
     );
     return response.data.data;
@@ -127,7 +127,7 @@ export const paymentService = {
       status: PaymentStatus;
       message?: string;
       updatedAt: string;
-    }>>(`/payments/${paymentId}/status`);
+    }>>(`/payments/${encodeURIComponent(paymentId)}/status`);
     return response.data.data;
   },
 
@@ -181,10 +181,7 @@ export const paymentService = {
    */
   addPaymentMethod: async (methodData: {
     type: 'card' | 'bank_transfer' | 'wallet' | 'upi';
-    cardNumber?: string;
-    expiryMonth?: number;
-    expiryYear?: number;
-    cvv?: string;
+    paymentToken?: string;
     bankAccountNumber?: string;
     bankRoutingNumber?: string;
     upiId?: string;

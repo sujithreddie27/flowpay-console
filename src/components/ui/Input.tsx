@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, forwardRef, useState } from 'react';
+import { InputHTMLAttributes, forwardRef, useState, useId } from 'react';
 import { EyeIcon, EyeSlashIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/utils';
 
@@ -31,10 +31,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     const [showPassword, setShowPassword] = useState(false);
+    const generatedId = useId();
     const isPassword = type === 'password';
     const inputType = isPassword && showPassword ? 'text' : type;
 
-    const inputId = id || `input-${Math.random().toString(36).substring(7)}`;
+    const inputId = id || generatedId;
 
     const baseStyles =
       'w-full rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 disabled:bg-secondary-50 disabled:text-secondary-500 disabled:cursor-not-allowed dark:disabled:bg-secondary-900';

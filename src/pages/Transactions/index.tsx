@@ -195,6 +195,7 @@ export function TransactionsPage() {
   const handleSearch = useCallback(() => {
     setSearch(searchInput.trim());
     setPage(1);
+    setMobilePages([]);
   }, [searchInput]);
 
   const handleSearchKeyDown = useCallback(
@@ -209,6 +210,7 @@ export function TransactionsPage() {
       prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
     );
     setPage(1);
+    setMobilePages([]);
   }, []);
 
   const toggleType = useCallback((type: TransactionType) => {
@@ -216,6 +218,7 @@ export function TransactionsPage() {
       prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
     );
     setPage(1);
+    setMobilePages([]);
   }, []);
 
   const clearFilters = useCallback(() => {
@@ -228,6 +231,7 @@ export function TransactionsPage() {
     setSearch('');
     setSearchInput('');
     setPage(1);
+    setMobilePages([]);
   }, []);
 
   const activeFilterCount = useMemo(() => {

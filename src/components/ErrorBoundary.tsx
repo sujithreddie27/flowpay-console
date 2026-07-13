@@ -28,7 +28,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     this.setState({ errorInfo });
     this.props.onError?.(error, errorInfo);
 
-    // Log to external service in production
+    // TODO: Integrate with external error tracking service (e.g. Sentry)
     if (import.meta.env.PROD) {
       console.error('[ErrorBoundary]', error, errorInfo);
     }

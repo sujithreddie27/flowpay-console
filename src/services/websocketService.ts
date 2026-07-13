@@ -55,12 +55,14 @@ class WebSocketService {
     this.intentionalClose = false;
     this.setStatus('connecting');
 
-    const url = token
-      ? `${this.config.url}?token=${encodeURIComponent(token)}`
-      : this.config.url;
+    // Send token via subprotocol instead of URL query to avoid leaking it
+    // in browser history, server logs, and referrer headers
+    const protocols = token
+      ? [`auth-token.${token}`, ...(this.config.protocols || [])]
+      : this.config.protocols;
 
     try {
-      this.ws = new WebSocket(url, this.config.protocols);
+      this.ws = new WebSocket(this.config.url, protocols);
       this.ws.onopen = this.handleOpen.bind(this);
       this.ws.onmessage = this.handleMessage.bind(this);
       this.ws.onclose = this.handleClose.bind(this);
@@ -136,13 +138,25 @@ class WebSocketService {
     // Notify type-specific listeners
     const handlers = this.listeners.get(message.type);
     if (handlers) {
-      handlers.forEach((handler) => handler(message));
+      handlers.forEach((handler) => {
+        try {
+          handler(message);
+        } catch (err) {
+          console.error(`[WebSocket] Handler error for event "${message.type}":`, err);
+        }
+      });
     }
 
     // Notify wildcard listeners
     const allHandlers = this.listeners.get('*');
     if (allHandlers) {
-      allHandlers.forEach((handler) => handler(message));
+      allHandlers.forEach((handler) => {
+        try {
+          handler(message);
+        } catch (err) {
+          console.error('[WebSocket] Wildcard handler error:', err);
+        }
+      });
     }
   }
 

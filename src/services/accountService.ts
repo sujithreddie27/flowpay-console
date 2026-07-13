@@ -30,7 +30,7 @@ export const accountService = {
    */
   getAccountById: async (accountId: string): Promise<Account> => {
     const response = await apiClient.get<ApiResponse<Account>>(
-      `/accounts/${accountId}`
+      `/accounts/${encodeURIComponent(accountId)}`
     );
     return response.data.data;
   },
@@ -54,7 +54,7 @@ export const accountService = {
     updates: UpdateAccountRequest
   ): Promise<Account> => {
     const response = await apiClient.patch<ApiResponse<Account>>(
-      `/accounts/${accountId}`,
+      `/accounts/${encodeURIComponent(accountId)}`,
       updates
     );
     return response.data.data;
@@ -64,7 +64,7 @@ export const accountService = {
    * Delete/close account
    */
   deleteAccount: async (accountId: string): Promise<void> => {
-    await apiClient.delete(`/accounts/${accountId}`);
+    await apiClient.delete(`/accounts/${encodeURIComponent(accountId)}`);
   },
 
   /**
@@ -79,7 +79,7 @@ export const accountService = {
       balance: number;
       availableBalance: number;
       currency: string;
-    }>>(`/accounts/${accountId}/balance`);
+    }>>(`/accounts/${encodeURIComponent(accountId)}/balance`);
     return response.data.data;
   },
 
@@ -91,7 +91,7 @@ export const accountService = {
     params?: { fromDate?: string; toDate?: string; interval?: 'day' | 'week' | 'month' }
   ): Promise<AccountBalanceHistory[]> => {
     const response = await apiClient.get<ApiResponse<AccountBalanceHistory[]>>(
-      `/accounts/${accountId}/balance/history`,
+      `/accounts/${encodeURIComponent(accountId)}/balance/history`,
       { params }
     );
     return response.data.data;
@@ -102,7 +102,7 @@ export const accountService = {
    */
   freezeAccount: async (accountId: string, reason?: string): Promise<Account> => {
     const response = await apiClient.post<ApiResponse<Account>>(
-      `/accounts/${accountId}/freeze`,
+      `/accounts/${encodeURIComponent(accountId)}/freeze`,
       { reason }
     );
     return response.data.data;
@@ -113,7 +113,7 @@ export const accountService = {
    */
   unfreezeAccount: async (accountId: string): Promise<Account> => {
     const response = await apiClient.post<ApiResponse<Account>>(
-      `/accounts/${accountId}/unfreeze`
+      `/accounts/${encodeURIComponent(accountId)}/unfreeze`
     );
     return response.data.data;
   },
@@ -129,7 +129,7 @@ export const accountService = {
       format?: 'json' | 'pdf' | 'csv';
     }
   ): Promise<Blob | any> => {
-    const response = await apiClient.get(`/accounts/${accountId}/statement`, {
+    const response = await apiClient.get(`/accounts/${encodeURIComponent(accountId)}/statement`, {
       params,
       responseType: params.format === 'json' ? 'json' : 'blob',
     });
@@ -149,7 +149,7 @@ export const accountService = {
     }
   ): Promise<PaginatedResponse<any>> => {
     const response = await apiClient.get<ApiResponse<PaginatedResponse<any>>>(
-      `/accounts/${accountId}/transactions`,
+      `/accounts/${encodeURIComponent(accountId)}/transactions`,
       { params }
     );
     return response.data.data;

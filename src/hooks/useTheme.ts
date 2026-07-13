@@ -54,9 +54,18 @@ export function useTheme() {
   }, []);
 
   const toggleTheme = useCallback(() => {
-    const next: Theme = resolvedTheme === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-  }, [resolvedTheme, setTheme]);
+    setThemeState((prev) => {
+      const resolved = prev === 'system' ? getSystemPreference() : prev;
+      const next: Theme = resolved === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        // localStorage unavailable
+      }
+      applyTheme(next);
+      return next;
+    });
+  }, []);
 
   // Apply theme on mount and listen for system preference changes
   useEffect(() => {

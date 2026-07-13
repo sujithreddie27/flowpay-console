@@ -73,8 +73,10 @@ export function useCurrencyFormatter(currency: string = 'INR', locale: string = 
  * Returns a memoized date formatter to avoid recreating on each render.
  */
 export function useDateFormatter(options?: Intl.DateTimeFormatOptions, locale: string = 'en-IN') {
+  const optionsKey = options ? JSON.stringify(options, Object.keys(options).sort()) : '';
   return useMemo(
     () => new Intl.DateTimeFormat(locale, options),
-    [locale, JSON.stringify(options)]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locale, optionsKey]
   );
 }

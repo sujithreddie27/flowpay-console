@@ -349,6 +349,7 @@ export function PaymentsPage() {
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [estimatedFee, setEstimatedFee] = useState<number | undefined>();
+  const [pendingIdempotencyKey, setPendingIdempotencyKey] = useState<string>('');
   const [paymentResult, setPaymentResult] = useState<{
     transactionId: string;
     amount: number;
@@ -410,8 +411,9 @@ export function PaymentsPage() {
   );
 
   const onSubmitForm = handleSubmit(async (data) => {
-    // Validate payment first
+    // Generate idempotency key once, reuse for confirm
     const idempotencyKey = crypto.randomUUID();
+    setPendingIdempotencyKey(idempotencyKey);
     const payload: InitiatePaymentRequest = {
       accountId: data.accountId,
       amount: data.amount,
@@ -438,7 +440,6 @@ export function PaymentsPage() {
 
   const handleConfirmPayment = async () => {
     const data = watch();
-    const idempotencyKey = crypto.randomUUID();
     const payload: InitiatePaymentRequest = {
       accountId: data.accountId,
       amount: data.amount!,
@@ -446,7 +447,7 @@ export function PaymentsPage() {
       method: data.method!,
       recipientId: data.recipientId,
       description: data.description || undefined,
-      idempotencyKey,
+      idempotencyKey: pendingIdempotencyKey,
     };
 
     try {

@@ -126,13 +126,13 @@ export const transactionService = {
   },
 
   /**
-   * Download transaction receipt (PDF)
+   * Download transaction receipt
    */
-  downloadReceipt: async (transactionId: string): Promise<Blob> => {
-    const response = await apiClient.get(`/transactions/${encodeURIComponent(transactionId)}/receipt`, {
-      responseType: 'blob',
-    });
-    return response.data;
+  downloadReceipt: async (transactionId: string): Promise<any> => {
+    const response = await apiClient.get<ApiResponse<any>>(
+      `/transactions/${encodeURIComponent(transactionId)}/receipt`
+    );
+    return response.data.data;
   },
 
   /**

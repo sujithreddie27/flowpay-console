@@ -107,7 +107,7 @@ const refreshAccessToken = async (): Promise<string> => {
   }
 
   try {
-    const response = await axios.post<RefreshTokenResponse>(
+    const response = await axios.post(
       `${API_BASE_URL}/api/v1/auth/refresh`,
       { refreshToken },
       {
@@ -117,7 +117,7 @@ const refreshAccessToken = async (): Promise<string> => {
       }
     );
 
-    const { accessToken, refreshToken: newRefreshToken } = response.data;
+    const { accessToken, refreshToken: newRefreshToken } = response.data.data;
 
     // Update stored tokens
     tokenManager.setTokens(accessToken, newRefreshToken);

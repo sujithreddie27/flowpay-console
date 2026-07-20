@@ -76,8 +76,9 @@ export const authService = {
    */
   logout: async (): Promise<void> => {
     try {
+      const refreshToken = tokenManager.getRefreshToken();
       // Call logout endpoint to invalidate tokens on server
-      await apiClient.post('/auth/logout');
+      await apiClient.post('/auth/logout', { refreshToken });
     } catch (error) {
       // Continue with local cleanup even if server request fails
       console.error('Logout request failed:', error);

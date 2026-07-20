@@ -183,12 +183,13 @@ export function LoginPage() {
               Remember me
             </span>
           </label>
-          <Link
-            to="/forgot-password"
+          <button
+            type="button"
             className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+            onClick={() => window.alert('Please contact your administrator to reset your password.')}
           >
             Forgot password?
-          </Link>
+          </button>
         </div>
 
         {/* Submit Button */}

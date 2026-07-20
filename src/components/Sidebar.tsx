@@ -1,4 +1,4 @@
-import { Fragment, memo } from 'react';
+import { Fragment, memo, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Dialog, Transition } from '@headlessui/react';
 import {
@@ -16,18 +16,23 @@ import {
   ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/utils';
+import { useAppSelector } from '@/store';
 import type { NavItem } from '@/types';
 
-const navigation: NavItem[] = [
+interface NavItemWithRole extends NavItem {
+  adminOnly?: boolean;
+}
+
+const navigation: NavItemWithRole[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Transactions', href: '/transactions', icon: ArrowsRightLeftIcon },
   { name: 'Payments', href: '/payments/new', icon: CreditCardIcon },
   { name: 'Accounts', href: '/accounts', icon: BanknotesIcon },
   { name: 'Monitoring', href: '/monitoring', icon: ChartBarIcon },
-  { name: 'Admin', href: '/admin/dashboard', icon: ShieldCheckIcon },
-  { name: 'Users', href: '/admin/users', icon: UserGroupIcon },
-  { name: 'All Transactions', href: '/admin/transactions', icon: DocumentMagnifyingGlassIcon },
-  { name: 'Audit Trail', href: '/admin/audit-trail', icon: ClipboardDocumentListIcon },
+  { name: 'Admin', href: '/admin/dashboard', icon: ShieldCheckIcon, adminOnly: true },
+  { name: 'Users', href: '/admin/users', icon: UserGroupIcon, adminOnly: true },
+  { name: 'All Transactions', href: '/admin/transactions', icon: DocumentMagnifyingGlassIcon, adminOnly: true },
+  { name: 'Audit Trail', href: '/admin/audit-trail', icon: ClipboardDocumentListIcon, adminOnly: true },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];
 
@@ -39,9 +44,17 @@ interface SidebarProps {
 }
 
 const NavItems = memo(function NavItems({ collapsed }: { collapsed: boolean }) {
+  const user = useAppSelector((state) => state.auth.user);
+  const isAdmin = user?.role === 'admin';
+
+  const visibleNavigation = useMemo(
+    () => navigation.filter((item) => !item.adminOnly || isAdmin),
+    [isAdmin]
+  );
+
   return (
     <nav aria-label="Main navigation" className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-hide">
-      {navigation.map((item) => (
+      {visibleNavigation.map((item) => (
         <NavLink
           key={item.name}
           to={item.href}

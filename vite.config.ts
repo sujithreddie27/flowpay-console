@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -67,11 +67,19 @@ export default defineConfig({
     chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'redux-vendor': ['@reduxjs/toolkit', '@tanstack/react-query'],
-          'ui-vendor': ['@headlessui/react', '@heroicons/react'],
-          'chart-vendor': ['recharts'],
+        manualChunks(id) {
+          if (id.includes('react-router-dom') || id.includes('react-dom') || id.includes('/react/')) {
+            return 'react-vendor';
+          }
+          if (id.includes('@reduxjs/toolkit') || id.includes('@tanstack/react-query')) {
+            return 'redux-vendor';
+          }
+          if (id.includes('@headlessui/react') || id.includes('@heroicons/react')) {
+            return 'ui-vendor';
+          }
+          if (id.includes('recharts')) {
+            return 'chart-vendor';
+          }
         },
         // Content-hash based filenames for long-term caching
         chunkFileNames: 'assets/js/[name]-[hash].js',

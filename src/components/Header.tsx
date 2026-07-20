@@ -71,7 +71,7 @@ export const Header = memo(function Header({ onMenuClick }: HeaderProps) {
         <div className="flex flex-1 max-w-lg">
           <div className={cn(
             'relative w-full transition-all duration-200',
-            showSearch ? 'opacity-100' : 'opacity-100'
+            showSearch ? 'ring-2 ring-primary-500 rounded-lg' : ''
           )}>
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <MagnifyingGlassIcon className="h-4 w-4 text-secondary-400" aria-hidden="true" />
@@ -88,7 +88,11 @@ export const Header = memo(function Header({ onMenuClick }: HeaderProps) {
               className="block w-full rounded-lg border-0 bg-secondary-50 dark:bg-secondary-800 py-2 pl-10 pr-16 text-sm text-secondary-900 dark:text-secondary-100 placeholder:text-secondary-400 dark:placeholder:text-secondary-500 ring-1 ring-inset ring-secondary-200 dark:ring-secondary-700 focus:ring-2 focus:ring-primary-500 transition-all"
             />
             <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center gap-0.5 rounded border border-secondary-300 dark:border-secondary-600 bg-secondary-100 dark:bg-secondary-700 px-1.5 py-0.5 text-[10px] font-medium text-secondary-500 dark:text-secondary-400">
-              <span className="text-[11px]">⌘</span>K
+              {navigator.platform.includes('Mac') ? (
+                <><span className="text-[11px]">⌘</span>K</>
+              ) : (
+                <>Ctrl+K</>
+              )}
             </kbd>
           </div>
         </div>

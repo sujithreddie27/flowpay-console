@@ -179,7 +179,7 @@ export const adminService = {
    * Override transaction status manually
    */
   overrideTransactionStatus: async (data: AdminTransactionOverride): Promise<Transaction> => {
-    const response = await apiClient.put<ApiResponse<Transaction>>(
+    const response = await apiClient.post<ApiResponse<Transaction>>(
       `/admin/transactions/${encodeURIComponent(data.transactionId)}/override`,
       { newStatus: data.newStatus, reason: data.reason }
     );

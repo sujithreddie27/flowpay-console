@@ -51,7 +51,7 @@ export const settingsService = {
     }
 
     const formData = new FormData();
-    formData.append('avatar', file);
+    formData.append('file', file);
 
     const response = await apiClient.post<ApiResponse<{ avatarUrl: string }>>(
       '/settings/profile/avatar',

@@ -34,11 +34,28 @@ export const dashboardService = {
     toDate?: string;
     interval?: 'day' | 'week' | 'month';
   }): Promise<DashboardChartData> => {
-    const response = await apiClient.get<ApiResponse<DashboardChartData>>(
+    const response = await apiClient.get<ApiResponse<any>>(
       '/dashboard/charts',
       { params }
     );
-    return response.data.data;
+    const raw = response.data.data;
+
+    // Transform backend shape to frontend expected shape
+    const volumeData = raw.volumeData ?? raw.transactionVolume ?? [];
+    const revenueData = raw.revenueData ?? raw.revenue ?? [];
+
+    // statusDistribution may be a Map<string, number> from backend
+    let statusDistribution = raw.statusDistribution ?? [];
+    if (statusDistribution && !Array.isArray(statusDistribution)) {
+      const total = Object.values(statusDistribution as Record<string, number>).reduce((sum: number, v: number) => sum + v, 0);
+      statusDistribution = Object.entries(statusDistribution as Record<string, number>).map(([status, count]) => ({
+        status,
+        count,
+        percentage: total > 0 ? (count / total) * 100 : 0,
+      }));
+    }
+
+    return { volumeData, statusDistribution, revenueData };
   },
 
   /**

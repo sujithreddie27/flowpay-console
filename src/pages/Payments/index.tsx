@@ -216,11 +216,11 @@ interface ConfirmationModalProps {
 }
 
 function ConfirmationModal({ isOpen, onClose, onConfirm, isLoading, formData, estimatedFee }: ConfirmationModalProps) {
-  if (!formData) return null;
+  if (!formData || formData.amount == null) return null;
 
   const currency = CURRENCIES.find((c) => c.value === formData.currency);
   const method = PAYMENT_METHODS.find((m) => m.value === formData.method);
-  const totalAmount = formData.amount + (estimatedFee || 0);
+  const totalAmount = (formData.amount || 0) + (estimatedFee || 0);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="md" closeOnOverlayClick={!isLoading}>

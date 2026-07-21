@@ -428,28 +428,38 @@ function buildStatCards(stats?: DashboardStats): StatCardProps[] {
     ];
   }
 
-  const monthTxn = stats.totalTransactions.month;
-  const weekTxn = stats.totalTransactions.week;
+  // Handle both flat (API) and nested (typed) response shapes
+  const txnData = stats.totalTransactions;
+  const monthTxn = typeof txnData === 'object' && txnData !== null ? txnData.month : (txnData as unknown as number) || 0;
+  const weekTxn = typeof txnData === 'object' && txnData !== null ? txnData.week : 0;
   const txnChange = weekTxn > 0 ? ((monthTxn - weekTxn * 4) / (weekTxn * 4)) * 100 : 0;
+
+  const volData = stats.totalVolume;
+  const monthVol = typeof volData === 'object' && volData !== null ? volData.month : (volData as unknown as number) || 0;
+  const volCurrency = typeof volData === 'object' && volData !== null ? volData.currency : 'INR';
+
+  const rateData = stats.successRate;
+  const monthRate = typeof rateData === 'object' && rateData !== null ? rateData.month : (rateData as unknown as number) || 0;
+  const weekRate = typeof rateData === 'object' && rateData !== null ? rateData.week : 0;
 
   return [
     {
       label: 'Total Transactions',
-      value: formatNumber(stats.totalTransactions.month),
+      value: formatNumber(monthTxn),
       change: txnChange,
       icon: ChartBarIcon,
       iconBg: 'bg-primary-500',
     },
     {
       label: 'Volume Processed',
-      value: formatCurrency(stats.totalVolume.month, stats.totalVolume.currency),
+      value: formatCurrency(monthVol, volCurrency),
       icon: BanknotesIcon,
       iconBg: 'bg-success-500',
     },
     {
       label: 'Success Rate',
-      value: `${stats.successRate.month.toFixed(1)}%`,
-      change: stats.successRate.month - stats.successRate.week,
+      value: `${monthRate.toFixed(1)}%`,
+      change: monthRate - weekRate,
       icon: ArrowTrendingUpIcon,
       iconBg: 'bg-warning-500',
     },

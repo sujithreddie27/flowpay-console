@@ -7,13 +7,16 @@ import { QueryClientProvider, queryClient } from '@/services';
 import { store } from '@/store';
 import { reportWebVitals } from '@/utils';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { ToastProvider } from '@/components/ui';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <App />
+          <ToastProvider>
+            <App />
+          </ToastProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </Provider>

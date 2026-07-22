@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useCallback } from 'react';
+import { useAppSelector } from '@/store';
 import {
   CreditCardIcon,
   PlusIcon,
@@ -903,10 +904,11 @@ function CreateAccountModal({ isOpen, onClose }: CreateAccountModalProps) {
   const [accountType, setAccountType] = useState<CreateAccountRequest['accountType']>('savings');
   const [currency, setCurrency] = useState('USD');
   const createAccount = useCreateAccount();
+  const user = useAppSelector((state) => state.auth.user);
 
   const handleSubmit = () => {
     createAccount.mutate(
-      { accountType, currency },
+      { accountType, currency, userId: user?.id },
       {
         onSuccess: () => {
           onClose();

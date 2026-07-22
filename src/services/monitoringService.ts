@@ -2,12 +2,10 @@ import apiClient from './axios.config';
 import type {
   ApiResponse,
   SystemHealthResponse,
-  ApiResponseTimeData,
-  ErrorRateData,
-  KafkaConsumerLagData,
+  ResponseTimesResponse,
+  ErrorRatesResponse,
+  KafkaLagResponse,
   MonitoringAlert,
-  MonitoringAlertListParams,
-  PaginatedResponse,
 } from '@/types';
 
 // ============================================================================
@@ -35,16 +33,11 @@ export const monitoringService = {
   // --------------------------------------------------------------------------
 
   /**
-   * Get API response time percentiles (p50, p95, p99) over time
+   * Get API response time percentiles (p50, p95, p99) — point-in-time snapshot
    */
-  getApiResponseTimes: async (params?: {
-    fromDate?: string;
-    toDate?: string;
-    interval?: 'minute' | 'hour' | 'day';
-  }): Promise<ApiResponseTimeData[]> => {
-    const response = await apiClient.get<ApiResponse<ApiResponseTimeData[]>>(
+  getApiResponseTimes: async (): Promise<ResponseTimesResponse> => {
+    const response = await apiClient.get<ApiResponse<ResponseTimesResponse>>(
       '/admin/monitoring/response-times',
-      { params }
     );
     return response.data.data;
   },
@@ -54,16 +47,11 @@ export const monitoringService = {
   // --------------------------------------------------------------------------
 
   /**
-   * Get error rate trend data over time
+   * Get error rate data — point-in-time snapshot
    */
-  getErrorRates: async (params?: {
-    fromDate?: string;
-    toDate?: string;
-    interval?: 'minute' | 'hour' | 'day';
-  }): Promise<ErrorRateData[]> => {
-    const response = await apiClient.get<ApiResponse<ErrorRateData[]>>(
+  getErrorRates: async (): Promise<ErrorRatesResponse> => {
+    const response = await apiClient.get<ApiResponse<ErrorRatesResponse>>(
       '/admin/monitoring/error-rates',
-      { params }
     );
     return response.data.data;
   },
@@ -73,10 +61,10 @@ export const monitoringService = {
   // --------------------------------------------------------------------------
 
   /**
-   * Get Kafka consumer lag metrics per topic/partition
+   * Get Kafka consumer lag metrics per consumer group
    */
-  getKafkaConsumerLag: async (): Promise<KafkaConsumerLagData[]> => {
-    const response = await apiClient.get<ApiResponse<KafkaConsumerLagData[]>>(
+  getKafkaConsumerLag: async (): Promise<KafkaLagResponse> => {
+    const response = await apiClient.get<ApiResponse<KafkaLagResponse>>(
       '/admin/monitoring/kafka-lag'
     );
     return response.data.data;
@@ -87,14 +75,11 @@ export const monitoringService = {
   // --------------------------------------------------------------------------
 
   /**
-   * Get monitoring alerts with filtering
+   * Get monitoring alerts
    */
-  getAlerts: async (
-    params?: MonitoringAlertListParams
-  ): Promise<PaginatedResponse<MonitoringAlert>> => {
-    const response = await apiClient.get<ApiResponse<PaginatedResponse<MonitoringAlert>>>(
+  getAlerts: async (): Promise<MonitoringAlert[]> => {
+    const response = await apiClient.get<ApiResponse<MonitoringAlert[]>>(
       '/admin/monitoring/alerts',
-      { params }
     );
     return response.data.data;
   },
@@ -102,21 +87,19 @@ export const monitoringService = {
   /**
    * Acknowledge a monitoring alert
    */
-  acknowledgeAlert: async (alertId: string): Promise<MonitoringAlert> => {
-    const response = await apiClient.put<ApiResponse<MonitoringAlert>>(
+  acknowledgeAlert: async (alertId: string): Promise<void> => {
+    await apiClient.put(
       `/admin/monitoring/alerts/${encodeURIComponent(alertId)}/acknowledge`
     );
-    return response.data.data;
   },
 
   /**
    * Resolve a monitoring alert
    */
-  resolveAlert: async (alertId: string): Promise<MonitoringAlert> => {
-    const response = await apiClient.put<ApiResponse<MonitoringAlert>>(
+  resolveAlert: async (alertId: string): Promise<void> => {
+    await apiClient.put(
       `/admin/monitoring/alerts/${encodeURIComponent(alertId)}/resolve`
     );
-    return response.data.data;
   },
 };
 

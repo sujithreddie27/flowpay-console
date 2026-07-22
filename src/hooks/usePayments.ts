@@ -57,6 +57,8 @@ export const useSavedRecipients = () => {
   return useQuery({
     queryKey: queryKeys.payments.recipients(),
     queryFn: () => paymentService.getSavedRecipients(),
+    retry: false,
+    meta: { suppressError: true },
   });
 };
 
@@ -67,5 +69,7 @@ export const usePaymentMethods = () => {
   return useQuery({
     queryKey: queryKeys.payments.methods(),
     queryFn: () => paymentService.getPaymentMethods(),
+    retry: false,
+    meta: { suppressError: true },
   });
 };

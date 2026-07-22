@@ -1,17 +1,5 @@
 import { useState, useCallback } from 'react';
 import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from 'recharts';
-import {
   ServerStackIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
@@ -23,7 +11,6 @@ import {
   ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import { Badge, Button, Card, LoadingSpinner } from '@/components/ui';
-import { ChartWrapper } from '@/components/charts';
 import {
   useSystemHealth,
   useApiResponseTimes,
@@ -34,11 +21,8 @@ import {
   useResolveMonitoringAlert,
 } from '@/hooks/useMonitoring';
 import type {
-  ServiceHealth,
-  ServiceStatus,
   MonitoringAlert,
-  AlertSeverity,
-  KafkaConsumerLagData,
+  KafkaLagResponse,
 } from '@/types';
 import { cn } from '@/utils';
 
@@ -54,16 +38,9 @@ const REFRESH_OPTIONS: { label: string; value: RefreshInterval }[] = [
   { label: '60s', value: 60_000 },
 ];
 
-type AlertTab = 'active' | 'history';
-
 // ============================================================================
 // Helpers
 // ============================================================================
-
-function formatTime(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-}
 
 function formatMs(value: number): string {
   if (value >= 1000) return `${(value / 1000).toFixed(1)}s`;
@@ -71,7 +48,7 @@ function formatMs(value: number): string {
 }
 
 function formatPercent(value: number): string {
-  return `${value.toFixed(2)}%`;
+  return `${(value * 100).toFixed(2)}%`;
 }
 
 function formatNumber(value: number): string {
@@ -90,11 +67,27 @@ function relativeTime(dateStr: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
+/** Map actuator status string to a UI status */
+function mapActuatorStatus(status: string): 'up' | 'degraded' | 'down' {
+  const upper = status.toUpperCase();
+  if (upper === 'UP') return 'up';
+  if (upper === 'DOWN' || upper === 'OUT_OF_SERVICE') return 'down';
+  return 'degraded';
+}
+
+/** Map actuator overall status to banner status */
+function mapOverallStatus(status: string): 'healthy' | 'degraded' | 'down' {
+  const mapped = mapActuatorStatus(status);
+  if (mapped === 'up') return 'healthy';
+  if (mapped === 'down') return 'down';
+  return 'degraded';
+}
+
 // ============================================================================
 // Sub-Components
 // ============================================================================
 
-function ServiceStatusIcon({ status }: { status: ServiceStatus }) {
+function StatusIcon({ status }: { status: 'up' | 'degraded' | 'down' }) {
   switch (status) {
     case 'up':
       return <CheckCircleIcon className="h-5 w-5 text-success-500" />;
@@ -105,8 +98,8 @@ function ServiceStatusIcon({ status }: { status: ServiceStatus }) {
   }
 }
 
-function ServiceStatusBadge({ status }: { status: ServiceStatus }) {
-  const map: Record<ServiceStatus, { variant: 'success' | 'warning' | 'danger'; label: string }> = {
+function StatusBadge({ status }: { status: 'up' | 'degraded' | 'down' }) {
+  const map: Record<'up' | 'degraded' | 'down', { variant: 'success' | 'warning' | 'danger'; label: string }> = {
     up: { variant: 'success', label: 'Healthy' },
     degraded: { variant: 'warning', label: 'Degraded' },
     down: { variant: 'danger', label: 'Down' },
@@ -149,44 +142,49 @@ function OverallStatusBanner({ status }: { status: 'healthy' | 'degraded' | 'dow
   );
 }
 
-// ---- Service Health Card ----
-function ServiceHealthCard({ service }: { service: ServiceHealth }) {
+// ---- Component Health Card ----
+function ComponentHealthCard({ name, status }: { name: string; status: string }) {
+  const uiStatus = mapActuatorStatus(status);
   return (
     <div className="flex items-center justify-between rounded-lg border border-secondary-200 bg-white px-4 py-3 dark:border-secondary-700 dark:bg-secondary-800">
       <div className="flex items-center gap-3">
-        <ServiceStatusIcon status={service.status} />
-        <div>
-          <p className="text-sm font-medium text-secondary-900 dark:text-white">
-            {service.name}
-          </p>
-          {service.latency != null && (
-            <p className="text-xs text-secondary-500 dark:text-secondary-400">
-              Latency: {formatMs(service.latency)}
-            </p>
-          )}
-        </div>
+        <StatusIcon status={uiStatus} />
+        <p className="text-sm font-medium text-secondary-900 dark:text-white capitalize">
+          {name}
+        </p>
       </div>
-      <div className="flex items-center gap-3">
-        {service.uptime != null && (
-          <span className="text-xs text-secondary-500 dark:text-secondary-400">
-            {service.uptime.toFixed(2)}% uptime
-          </span>
-        )}
-        <ServiceStatusBadge status={service.status} />
-      </div>
+      <StatusBadge status={uiStatus} />
     </div>
   );
 }
 
-// ---- Alert Severity Badge ----
-function AlertSeverityBadge({ severity }: { severity: AlertSeverity }) {
-  const map: Record<AlertSeverity, { variant: 'danger' | 'warning' | 'info'; label: string }> = {
-    critical: { variant: 'danger', label: 'Critical' },
-    warning: { variant: 'warning', label: 'Warning' },
-    info: { variant: 'info', label: 'Info' },
+// ---- Metric Card ----
+function MetricCard({
+  label,
+  value,
+  sublabel,
+  variant = 'default',
+}: {
+  label: string;
+  value: string;
+  sublabel?: string;
+  variant?: 'default' | 'success' | 'warning' | 'danger';
+}) {
+  const colorMap = {
+    default: 'text-secondary-900 dark:text-white',
+    success: 'text-success-600 dark:text-success-400',
+    warning: 'text-warning-600 dark:text-warning-400',
+    danger: 'text-danger-600 dark:text-danger-400',
   };
-  const { variant, label } = map[severity];
-  return <Badge variant={variant} size="sm" rounded>{label}</Badge>;
+  return (
+    <div className="rounded-lg border border-secondary-200 bg-white p-4 dark:border-secondary-700 dark:bg-secondary-800">
+      <p className="text-xs font-medium text-secondary-500 dark:text-secondary-400">{label}</p>
+      <p className={cn('mt-1 text-2xl font-bold', colorMap[variant])}>{value}</p>
+      {sublabel && (
+        <p className="mt-0.5 text-xs text-secondary-400 dark:text-secondary-500">{sublabel}</p>
+      )}
+    </div>
+  );
 }
 
 // ---- Alert Row ----
@@ -198,18 +196,22 @@ function AlertRow({
   isResolving,
 }: {
   alert: MonitoringAlert;
-  onAcknowledge: (id: string) => void;
-  onResolve: (id: string) => void;
+  onAcknowledge: (type: string) => void;
+  onResolve: (type: string) => void;
   isAcknowledging: boolean;
   isResolving: boolean;
 }) {
+  const severityUpper = alert.severity.toUpperCase();
+  const severityVariant: 'danger' | 'warning' | 'info' =
+    severityUpper === 'CRITICAL' ? 'danger' : severityUpper === 'WARNING' ? 'warning' : 'info';
+
   return (
     <div className="flex items-start justify-between gap-4 border-b border-secondary-100 px-4 py-3 last:border-b-0 dark:border-secondary-700">
       <div className="flex items-start gap-3 min-w-0">
         <div className="mt-0.5">
-          {alert.severity === 'critical' ? (
+          {severityUpper === 'CRITICAL' ? (
             <XCircleIcon className="h-5 w-5 text-danger-500" />
-          ) : alert.severity === 'warning' ? (
+          ) : severityUpper === 'WARNING' ? (
             <ExclamationTriangleIcon className="h-5 w-5 text-warning-500" />
           ) : (
             <SignalIcon className="h-5 w-5 text-primary-500" />
@@ -220,74 +222,58 @@ function AlertRow({
             <p className="text-sm font-medium text-secondary-900 dark:text-white truncate">
               {alert.title}
             </p>
-            <AlertSeverityBadge severity={alert.severity} />
+            <Badge variant={severityVariant} size="sm" rounded>
+              {alert.severity}
+            </Badge>
           </div>
           <p className="mt-0.5 text-xs text-secondary-500 dark:text-secondary-400 line-clamp-2">
-            {alert.message}
+            {alert.description}
           </p>
           <div className="mt-1 flex items-center gap-3 text-xs text-secondary-400 dark:text-secondary-500">
-            <span className="flex items-center gap-1">
-              <ClockIcon className="h-3.5 w-3.5" />
-              {relativeTime(alert.createdAt)}
+            <span>Service: {alert.service}</span>
+            <span>
+              Value: {alert.currentValue.toFixed(2)} (threshold: {alert.threshold})
             </span>
-            <span>Source: {alert.source}</span>
-            {alert.metric && (
-              <span>
-                {alert.metric}: {alert.currentValue ?? '—'} (threshold: {alert.threshold ?? '—'})
+            {alert.firedAt && (
+              <span className="flex items-center gap-1">
+                <ClockIcon className="h-3.5 w-3.5" />
+                {relativeTime(alert.firedAt)}
               </span>
             )}
           </div>
         </div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
-        {alert.status === 'active' && (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onAcknowledge(alert.id)}
-              isLoading={isAcknowledging}
-              disabled={isAcknowledging}
-            >
-              Acknowledge
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onResolve(alert.id)}
-              isLoading={isResolving}
-              disabled={isResolving}
-            >
-              Resolve
-            </Button>
-          </>
-        )}
-        {alert.status === 'acknowledged' && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onResolve(alert.id)}
-            isLoading={isResolving}
-            disabled={isResolving}
-          >
-            Resolve
-          </Button>
-        )}
-        {alert.status === 'resolved' && (
-          <Badge variant="success" size="sm" rounded>Resolved</Badge>
-        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onAcknowledge(alert.alertType)}
+          isLoading={isAcknowledging}
+          disabled={isAcknowledging}
+        >
+          Acknowledge
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onResolve(alert.alertType)}
+          isLoading={isResolving}
+          disabled={isResolving}
+        >
+          Resolve
+        </Button>
       </div>
     </div>
   );
 }
 
 // ---- Kafka Lag Table ----
-function KafkaLagTable({
+function KafkaLagSection({
   data,
   loading,
   error,
 }: {
-  data?: KafkaConsumerLagData[];
+  data?: KafkaLagResponse;
   loading: boolean;
   error: boolean;
 }) {
@@ -308,7 +294,8 @@ function KafkaLagTable({
     );
   }
 
-  if (!data?.length) {
+  const groups = data?.consumerGroups;
+  if (!groups || Object.keys(groups).length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-secondary-400 dark:text-secondary-500">
         <ServerStackIcon className="h-8 w-8" />
@@ -322,92 +309,57 @@ function KafkaLagTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-secondary-200 dark:border-secondary-700">
-            <th className="px-4 py-2 text-left font-medium text-secondary-600 dark:text-secondary-400">Topic</th>
             <th className="px-4 py-2 text-left font-medium text-secondary-600 dark:text-secondary-400">Consumer Group</th>
-            <th className="px-4 py-2 text-right font-medium text-secondary-600 dark:text-secondary-400">Partition</th>
-            <th className="px-4 py-2 text-right font-medium text-secondary-600 dark:text-secondary-400">Current Offset</th>
-            <th className="px-4 py-2 text-right font-medium text-secondary-600 dark:text-secondary-400">End Offset</th>
+            <th className="px-4 py-2 text-left font-medium text-secondary-600 dark:text-secondary-400">Partition</th>
             <th className="px-4 py-2 text-right font-medium text-secondary-600 dark:text-secondary-400">Lag</th>
+            <th className="px-4 py-2 text-right font-medium text-secondary-600 dark:text-secondary-400">Total Group Lag</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((row, idx) => (
-            <tr
-              key={`${row.topic}-${row.partition}-${idx}`}
-              className="border-b border-secondary-100 last:border-b-0 dark:border-secondary-800"
-            >
-              <td className="px-4 py-2 font-mono text-xs text-secondary-900 dark:text-white">
-                {row.topic}
-              </td>
-              <td className="px-4 py-2 text-secondary-600 dark:text-secondary-300">
-                {row.consumerGroup}
-              </td>
-              <td className="px-4 py-2 text-right text-secondary-600 dark:text-secondary-300">
-                {row.partition}
-              </td>
-              <td className="px-4 py-2 text-right font-mono text-xs text-secondary-600 dark:text-secondary-300">
-                {formatNumber(row.currentOffset)}
-              </td>
-              <td className="px-4 py-2 text-right font-mono text-xs text-secondary-600 dark:text-secondary-300">
-                {formatNumber(row.endOffset)}
-              </td>
-              <td className="px-4 py-2 text-right">
-                <span
-                  className={cn(
-                    'font-semibold font-mono text-xs',
-                    row.lag > 10_000
-                      ? 'text-danger-600 dark:text-danger-400'
-                      : row.lag > 1_000
-                        ? 'text-warning-600 dark:text-warning-400'
-                        : 'text-success-600 dark:text-success-400'
-                  )}
-                >
-                  {formatNumber(row.lag)}
-                </span>
-              </td>
-            </tr>
-          ))}
+          {Object.entries(groups).map(([groupName, group]) =>
+            Object.entries(group.partitionLag).map(([partition, lag], idx) => (
+              <tr
+                key={`${groupName}-${partition}`}
+                className="border-b border-secondary-100 last:border-b-0 dark:border-secondary-800"
+              >
+                {idx === 0 ? (
+                  <td
+                    className="px-4 py-2 font-mono text-xs text-secondary-900 dark:text-white"
+                    rowSpan={Object.keys(group.partitionLag).length}
+                  >
+                    {groupName}
+                  </td>
+                ) : null}
+                <td className="px-4 py-2 font-mono text-xs text-secondary-600 dark:text-secondary-300">
+                  {partition}
+                </td>
+                <td className="px-4 py-2 text-right">
+                  <span
+                    className={cn(
+                      'font-semibold font-mono text-xs',
+                      lag > 10_000
+                        ? 'text-danger-600 dark:text-danger-400'
+                        : lag > 1_000
+                          ? 'text-warning-600 dark:text-warning-400'
+                          : 'text-success-600 dark:text-success-400'
+                    )}
+                  >
+                    {formatNumber(lag)}
+                  </span>
+                </td>
+                {idx === 0 ? (
+                  <td
+                    className="px-4 py-2 text-right font-semibold font-mono text-xs text-secondary-900 dark:text-white"
+                    rowSpan={Object.keys(group.partitionLag).length}
+                  >
+                    {formatNumber(group.totalLag)}
+                  </td>
+                ) : null}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
-    </div>
-  );
-}
-
-// ---- Chart Tooltips ----
-function ResponseTimeTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-lg border border-secondary-200 bg-white px-4 py-3 shadow-lg dark:border-secondary-700 dark:bg-secondary-800">
-      <p className="text-xs font-medium text-secondary-500 dark:text-secondary-400 mb-2">
-        {formatTime(label)}
-      </p>
-      {payload.map((entry: any) => (
-        <div key={entry.dataKey} className="flex items-center gap-2 text-sm">
-          <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
-          <span className="text-secondary-600 dark:text-secondary-300">{entry.name}:</span>
-          <span className="font-semibold text-secondary-900 dark:text-white">{formatMs(entry.value)}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ErrorRateTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-lg border border-secondary-200 bg-white px-4 py-3 shadow-lg dark:border-secondary-700 dark:bg-secondary-800">
-      <p className="text-xs font-medium text-secondary-500 dark:text-secondary-400 mb-2">
-        {formatTime(label)}
-      </p>
-      {payload.map((entry: any) => (
-        <div key={entry.dataKey} className="flex items-center gap-2 text-sm">
-          <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
-          <span className="text-secondary-600 dark:text-secondary-300">{entry.name}:</span>
-          <span className="font-semibold text-secondary-900 dark:text-white">
-            {entry.dataKey === 'errorRate' ? formatPercent(entry.value) : formatNumber(entry.value)}
-          </span>
-        </div>
-      ))}
     </div>
   );
 }
@@ -418,19 +370,14 @@ function ErrorRateTooltip({ active, payload, label }: any) {
 
 export function MonitoringPage() {
   const [refreshInterval, setRefreshInterval] = useState<RefreshInterval>(30_000);
-  const [alertTab, setAlertTab] = useState<AlertTab>('active');
   const [refreshOpen, setRefreshOpen] = useState(false);
 
   // Queries with configurable auto-refresh
   const healthQuery = useSystemHealth(refreshInterval);
-  const responseTimesQuery = useApiResponseTimes({ interval: 'minute' }, refreshInterval);
-  const errorRatesQuery = useErrorRates({ interval: 'minute' }, refreshInterval);
+  const responseTimesQuery = useApiResponseTimes(refreshInterval);
+  const errorRatesQuery = useErrorRates(refreshInterval);
   const kafkaLagQuery = useKafkaConsumerLag(refreshInterval);
-
-  const activeAlertsQuery = useMonitoringAlerts(
-    { status: alertTab === 'active' ? 'active' : undefined, pageSize: 20 },
-    refreshInterval,
-  );
+  const alertsQuery = useMonitoringAlerts(refreshInterval);
 
   const acknowledgeMutation = useAcknowledgeMonitoringAlert();
   const resolveMutation = useResolveMonitoringAlert();
@@ -440,11 +387,10 @@ export function MonitoringPage() {
     responseTimesQuery.refetch();
     errorRatesQuery.refetch();
     kafkaLagQuery.refetch();
-    activeAlertsQuery.refetch();
-  }, [healthQuery, responseTimesQuery, errorRatesQuery, kafkaLagQuery, activeAlertsQuery]);
+    alertsQuery.refetch();
+  }, [healthQuery, responseTimesQuery, errorRatesQuery, kafkaLagQuery, alertsQuery]);
 
-  const activeAlerts = activeAlertsQuery.data?.items ?? [];
-  const activeAlertCount = activeAlerts.filter((a) => a.status === 'active').length;
+  const alerts = alertsQuery.data ?? [];
 
   return (
     <div className="space-y-6">
@@ -501,7 +447,7 @@ export function MonitoringPage() {
 
       {/* Overall Status Banner */}
       {healthQuery.data && (
-        <OverallStatusBanner status={healthQuery.data.overallStatus} />
+        <OverallStatusBanner status={mapOverallStatus(healthQuery.data.status)} />
       )}
 
       {/* Service Health Grid */}
@@ -513,11 +459,6 @@ export function MonitoringPage() {
               Service Health
             </h2>
           </div>
-          {healthQuery.data && (
-            <span className="text-xs text-secondary-400 dark:text-secondary-500">
-              Last checked: {relativeTime(healthQuery.data.lastCheck)}
-            </span>
-          )}
         </div>
         <div className="p-4">
           {healthQuery.isLoading ? (
@@ -529,100 +470,138 @@ export function MonitoringPage() {
               <ExclamationTriangleIcon className="h-8 w-8 text-danger-400" />
               <p className="mt-2 text-sm">Failed to load service health</p>
             </div>
-          ) : (
+          ) : healthQuery.data?.components ? (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {healthQuery.data?.services.map((service) => (
-                <ServiceHealthCard key={service.name} service={service} />
+              {Object.entries(healthQuery.data.components).map(([name, comp]) => (
+                <ComponentHealthCard key={name} name={name} status={comp.status} />
               ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-secondary-400">
+              <ServerStackIcon className="h-8 w-8" />
+              <p className="mt-2 text-sm">No service data available</p>
             </div>
           )}
         </div>
       </Card>
 
-      {/* Charts Row: API Response Times + Error Rate */}
+      {/* Metrics Row: API Response Times + Error Rates */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* API Response Time Chart */}
-        <ChartWrapper
-          title="API Response Times"
-          subtitle="p50, p95, p99 latency percentiles"
-          loading={responseTimesQuery.isLoading}
-          error={responseTimesQuery.isError}
-          empty={!responseTimesQuery.data?.length}
-          height={300}
-        >
-          <ResponsiveContainer width="100%" height={268}>
-            <LineChart data={responseTimesQuery.data}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-secondary-200 dark:stroke-secondary-700" />
-              <XAxis
-                dataKey="timestamp"
-                tickFormatter={formatTime}
-                className="text-xs"
-                tick={{ fill: '#9ca3af', fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tickFormatter={formatMs}
-                className="text-xs"
-                tick={{ fill: '#9ca3af', fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-                width={50}
-              />
-              <Tooltip content={<ResponseTimeTooltip />} />
-              <Legend iconSize={8} wrapperStyle={{ fontSize: 12 }} />
-              <Line type="monotone" dataKey="p50" name="p50" stroke="#10b981" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="p95" name="p95" stroke="#f59e0b" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="p99" name="p99" stroke="#ef4444" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartWrapper>
+        {/* API Response Times */}
+        <Card padding="none">
+          <div className="border-b border-secondary-200 px-6 py-4 dark:border-secondary-700">
+            <h3 className="text-sm font-semibold text-secondary-900 dark:text-white">
+              API Response Times
+            </h3>
+            <p className="mt-0.5 text-xs text-secondary-500 dark:text-secondary-400">
+              Current latency percentiles from Micrometer
+            </p>
+          </div>
+          <div className="p-4">
+            {responseTimesQuery.isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <LoadingSpinner size="lg" />
+              </div>
+            ) : responseTimesQuery.isError ? (
+              <div className="flex flex-col items-center justify-center py-8 text-secondary-500">
+                <ExclamationTriangleIcon className="h-8 w-8 text-danger-400" />
+                <p className="mt-2 text-sm">Failed to load response times</p>
+              </div>
+            ) : responseTimesQuery.data ? (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <MetricCard
+                  label="p50 (Median)"
+                  value={formatMs(responseTimesQuery.data.p50Ms)}
+                  variant="success"
+                />
+                <MetricCard
+                  label="p95"
+                  value={formatMs(responseTimesQuery.data.p95Ms)}
+                  variant="warning"
+                />
+                <MetricCard
+                  label="p99"
+                  value={formatMs(responseTimesQuery.data.p99Ms)}
+                  variant="danger"
+                />
+                <MetricCard
+                  label="Mean"
+                  value={formatMs(responseTimesQuery.data.meanMs)}
+                />
+                <MetricCard
+                  label="Max"
+                  value={formatMs(responseTimesQuery.data.maxMs)}
+                  variant={responseTimesQuery.data.maxMs > 2000 ? 'danger' : 'default'}
+                />
+                <MetricCard
+                  label="Total Requests"
+                  value={formatNumber(responseTimesQuery.data.totalRequests)}
+                />
+              </div>
+            ) : null}
+          </div>
+        </Card>
 
-        {/* Error Rate Chart */}
-        <ChartWrapper
-          title="Error Rate Trend"
-          subtitle="Error rate and error count over time"
-          loading={errorRatesQuery.isLoading}
-          error={errorRatesQuery.isError}
-          empty={!errorRatesQuery.data?.length}
-          height={300}
-        >
-          <ResponsiveContainer width="100%" height={268}>
-            <AreaChart data={errorRatesQuery.data}>
-              <defs>
-                <linearGradient id="errorRateGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-secondary-200 dark:stroke-secondary-700" />
-              <XAxis
-                dataKey="timestamp"
-                tickFormatter={formatTime}
-                tick={{ fill: '#9ca3af', fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tickFormatter={formatPercent}
-                tick={{ fill: '#9ca3af', fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-                width={50}
-              />
-              <Tooltip content={<ErrorRateTooltip />} />
-              <Legend iconSize={8} wrapperStyle={{ fontSize: 12 }} />
-              <Area
-                type="monotone"
-                dataKey="errorRate"
-                name="Error Rate"
-                stroke="#ef4444"
-                strokeWidth={2}
-                fill="url(#errorRateGradient)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartWrapper>
+        {/* Error Rates */}
+        <Card padding="none">
+          <div className="border-b border-secondary-200 px-6 py-4 dark:border-secondary-700">
+            <h3 className="text-sm font-semibold text-secondary-900 dark:text-white">
+              Error Rates
+            </h3>
+            <p className="mt-0.5 text-xs text-secondary-500 dark:text-secondary-400">
+              Current error rate from payment transaction counters
+            </p>
+          </div>
+          <div className="p-4">
+            {errorRatesQuery.isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <LoadingSpinner size="lg" />
+              </div>
+            ) : errorRatesQuery.isError ? (
+              <div className="flex flex-col items-center justify-center py-8 text-secondary-500">
+                <ExclamationTriangleIcon className="h-8 w-8 text-danger-400" />
+                <p className="mt-2 text-sm">Failed to load error rates</p>
+              </div>
+            ) : errorRatesQuery.data ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-3">
+                  <MetricCard
+                    label="Error Rate"
+                    value={formatPercent(errorRatesQuery.data.overallErrorRate)}
+                    variant={errorRatesQuery.data.overallErrorRate > 0.05 ? 'danger' : errorRatesQuery.data.overallErrorRate > 0.01 ? 'warning' : 'success'}
+                  />
+                  <MetricCard
+                    label="Total Errors"
+                    value={formatNumber(errorRatesQuery.data.totalErrors)}
+                    variant={errorRatesQuery.data.totalErrors > 0 ? 'danger' : 'success'}
+                  />
+                  <MetricCard
+                    label="Total Requests"
+                    value={formatNumber(errorRatesQuery.data.totalRequests)}
+                  />
+                </div>
+                {errorRatesQuery.data.errorsByType && Object.keys(errorRatesQuery.data.errorsByType).length > 0 && (
+                  <div>
+                    <p className="mb-2 text-xs font-medium text-secondary-500 dark:text-secondary-400">
+                      Errors by Type
+                    </p>
+                    <div className="space-y-1">
+                      {Object.entries(errorRatesQuery.data.errorsByType).map(([type, count]) => (
+                        <div
+                          key={type}
+                          className="flex items-center justify-between rounded border border-secondary-100 px-3 py-1.5 text-xs dark:border-secondary-700"
+                        >
+                          <span className="font-mono text-secondary-700 dark:text-secondary-300">{type}</span>
+                          <span className="font-semibold text-danger-600 dark:text-danger-400">{formatNumber(count)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
+        </Card>
       </div>
 
       {/* Kafka Consumer Lag */}
@@ -633,7 +612,7 @@ export function MonitoringPage() {
             Kafka Consumer Lag
           </h2>
         </div>
-        <KafkaLagTable
+        <KafkaLagSection
           data={kafkaLagQuery.data}
           loading={kafkaLagQuery.isLoading}
           error={kafkaLagQuery.isError}
@@ -648,67 +627,41 @@ export function MonitoringPage() {
             <h2 className="text-sm font-semibold text-secondary-900 dark:text-white">
               Alerts
             </h2>
-            {activeAlertCount > 0 && (
+            {alerts.length > 0 && (
               <Badge variant="danger" size="sm" rounded>
-                {activeAlertCount}
+                {alerts.length}
               </Badge>
             )}
-          </div>
-          <div className="flex rounded-lg border border-secondary-200 dark:border-secondary-700">
-            <button
-              onClick={() => setAlertTab('active')}
-              className={cn(
-                'px-3 py-1.5 text-xs font-medium rounded-l-lg transition-colors',
-                alertTab === 'active'
-                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
-                  : 'text-secondary-600 hover:bg-secondary-50 dark:text-secondary-400 dark:hover:bg-secondary-800'
-              )}
-            >
-              Active
-            </button>
-            <button
-              onClick={() => setAlertTab('history')}
-              className={cn(
-                'px-3 py-1.5 text-xs font-medium rounded-r-lg transition-colors',
-                alertTab === 'history'
-                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
-                  : 'text-secondary-600 hover:bg-secondary-50 dark:text-secondary-400 dark:hover:bg-secondary-800'
-              )}
-            >
-              History
-            </button>
           </div>
         </div>
 
         <div>
-          {activeAlertsQuery.isLoading ? (
+          {alertsQuery.isLoading ? (
             <div className="flex items-center justify-center py-12">
               <LoadingSpinner size="lg" />
             </div>
-          ) : activeAlertsQuery.isError ? (
+          ) : alertsQuery.isError ? (
             <div className="flex flex-col items-center justify-center py-12 text-secondary-500">
               <ExclamationTriangleIcon className="h-8 w-8 text-danger-400" />
               <p className="mt-2 text-sm">Failed to load alerts</p>
             </div>
-          ) : activeAlerts.length === 0 ? (
+          ) : alerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-secondary-400 dark:text-secondary-500">
               <CheckCircleIcon className="h-8 w-8" />
-              <p className="mt-2 text-sm">
-                {alertTab === 'active' ? 'No active alerts' : 'No alert history available'}
-              </p>
+              <p className="mt-2 text-sm">No active alerts</p>
             </div>
           ) : (
-            activeAlerts.map((alert) => (
+            alerts.map((alert) => (
               <AlertRow
-                key={alert.id}
+                key={alert.alertType}
                 alert={alert}
                 onAcknowledge={(id) => acknowledgeMutation.mutate(id)}
                 onResolve={(id) => resolveMutation.mutate(id)}
                 isAcknowledging={
-                  acknowledgeMutation.isPending && acknowledgeMutation.variables === alert.id
+                  acknowledgeMutation.isPending && acknowledgeMutation.variables === alert.alertType
                 }
                 isResolving={
-                  resolveMutation.isPending && resolveMutation.variables === alert.id
+                  resolveMutation.isPending && resolveMutation.variables === alert.alertType
                 }
               />
             ))

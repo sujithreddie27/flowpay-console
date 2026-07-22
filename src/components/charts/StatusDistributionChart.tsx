@@ -67,8 +67,8 @@ function CustomLegend({ payload }: any) {
 
   return (
     <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 pt-2">
-      {payload.map((entry: any) => (
-        <div key={entry.value} className="flex items-center gap-1.5">
+      {payload.map((entry: any, index: number) => (
+        <div key={entry.value ?? index} className="flex items-center gap-1.5">
           <span
             className="inline-block h-2.5 w-2.5 rounded-full"
             style={{ backgroundColor: entry.color }}

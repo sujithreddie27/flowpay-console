@@ -1,17 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { monitoringService } from '@/services/monitoringService';
 import { queryKeys } from '@/services/queryClient';
-import type { MonitoringAlertListParams } from '@/types';
+import { useAppSelector } from '@/store';
+
+function useIsAdmin() {
+  const user = useAppSelector((state) => state.auth.user);
+  return user?.role?.toLowerCase() === 'admin';
+}
 
 // ============================================================================
 // System Health
 // ============================================================================
 
 export const useSystemHealth = (refetchInterval?: number | false) => {
+  const isAdmin = useIsAdmin();
   return useQuery({
     queryKey: queryKeys.monitoring.health(),
     queryFn: () => monitoringService.getSystemHealth(),
-    refetchInterval: refetchInterval ?? 30_000,
+    refetchInterval: isAdmin ? (refetchInterval ?? 30_000) : false,
+    enabled: isAdmin,
+    retry: false,
   });
 };
 
@@ -19,18 +27,14 @@ export const useSystemHealth = (refetchInterval?: number | false) => {
 // API Response Times
 // ============================================================================
 
-export const useApiResponseTimes = (
-  params?: {
-    fromDate?: string;
-    toDate?: string;
-    interval?: 'minute' | 'hour' | 'day';
-  },
-  refetchInterval?: number | false,
-) => {
+export const useApiResponseTimes = (refetchInterval?: number | false) => {
+  const isAdmin = useIsAdmin();
   return useQuery({
-    queryKey: queryKeys.monitoring.responseTimes(params),
-    queryFn: () => monitoringService.getApiResponseTimes(params),
-    refetchInterval: refetchInterval ?? 30_000,
+    queryKey: queryKeys.monitoring.responseTimes(),
+    queryFn: () => monitoringService.getApiResponseTimes(),
+    refetchInterval: isAdmin ? (refetchInterval ?? 30_000) : false,
+    enabled: isAdmin,
+    retry: false,
   });
 };
 
@@ -38,18 +42,14 @@ export const useApiResponseTimes = (
 // Error Rates
 // ============================================================================
 
-export const useErrorRates = (
-  params?: {
-    fromDate?: string;
-    toDate?: string;
-    interval?: 'minute' | 'hour' | 'day';
-  },
-  refetchInterval?: number | false,
-) => {
+export const useErrorRates = (refetchInterval?: number | false) => {
+  const isAdmin = useIsAdmin();
   return useQuery({
-    queryKey: queryKeys.monitoring.errorRates(params),
-    queryFn: () => monitoringService.getErrorRates(params),
-    refetchInterval: refetchInterval ?? 30_000,
+    queryKey: queryKeys.monitoring.errorRates(),
+    queryFn: () => monitoringService.getErrorRates(),
+    refetchInterval: isAdmin ? (refetchInterval ?? 30_000) : false,
+    enabled: isAdmin,
+    retry: false,
   });
 };
 
@@ -58,10 +58,13 @@ export const useErrorRates = (
 // ============================================================================
 
 export const useKafkaConsumerLag = (refetchInterval?: number | false) => {
+  const isAdmin = useIsAdmin();
   return useQuery({
     queryKey: queryKeys.monitoring.kafkaLag(),
     queryFn: () => monitoringService.getKafkaConsumerLag(),
-    refetchInterval: refetchInterval ?? 30_000,
+    refetchInterval: isAdmin ? (refetchInterval ?? 30_000) : false,
+    enabled: isAdmin,
+    retry: false,
   });
 };
 
@@ -69,14 +72,14 @@ export const useKafkaConsumerLag = (refetchInterval?: number | false) => {
 // Monitoring Alerts
 // ============================================================================
 
-export const useMonitoringAlerts = (
-  params?: MonitoringAlertListParams,
-  refetchInterval?: number | false,
-) => {
+export const useMonitoringAlerts = (refetchInterval?: number | false) => {
+  const isAdmin = useIsAdmin();
   return useQuery({
-    queryKey: queryKeys.monitoring.alerts(params),
-    queryFn: () => monitoringService.getAlerts(params),
-    refetchInterval: refetchInterval ?? 30_000,
+    queryKey: queryKeys.monitoring.alerts(),
+    queryFn: () => monitoringService.getAlerts(),
+    refetchInterval: isAdmin ? (refetchInterval ?? 30_000) : false,
+    enabled: isAdmin,
+    retry: false,
   });
 };
 

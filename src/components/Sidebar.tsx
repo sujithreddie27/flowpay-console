@@ -45,7 +45,7 @@ interface SidebarProps {
 
 const NavItems = memo(function NavItems({ collapsed }: { collapsed: boolean }) {
   const user = useAppSelector((state) => state.auth.user);
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
 
   const visibleNavigation = useMemo(
     () => navigation.filter((item) => !item.adminOnly || isAdmin),
@@ -88,6 +88,34 @@ const NavItems = memo(function NavItems({ collapsed }: { collapsed: boolean }) {
     </nav>
   );
 });
+
+function UserProfileSection({ collapsed }: { collapsed: boolean }) {
+  const user = useAppSelector((state) => state.auth.user);
+  const initials = user?.name
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : '??';
+
+  return (
+    <div className={cn(
+      'flex items-center rounded-lg px-3 py-2 text-sm text-secondary-500 dark:text-secondary-400',
+      collapsed && 'justify-center px-2'
+    )}>
+      <div className="h-8 w-8 rounded-full bg-secondary-200 dark:bg-secondary-700 flex items-center justify-center flex-shrink-0">
+        <span className="text-xs font-medium text-secondary-600 dark:text-secondary-300">{initials}</span>
+      </div>
+      {!collapsed && (
+        <div className="ml-3 min-w-0">
+          <p className="text-sm font-medium text-secondary-900 dark:text-secondary-100 truncate">
+            {user?.name || 'User'}
+          </p>
+          <p className="text-xs text-secondary-500 dark:text-secondary-400 truncate">
+            {user?.email || ''}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export const Sidebar = memo(function Sidebar({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProps) {
   return (
@@ -202,24 +230,7 @@ export const Sidebar = memo(function Sidebar({ isOpen, isCollapsed, onClose, onT
 
         {/* Bottom section */}
         <div className="border-t border-secondary-200 dark:border-secondary-700 p-3">
-          <div className={cn(
-            'flex items-center rounded-lg px-3 py-2 text-sm text-secondary-500 dark:text-secondary-400',
-            isCollapsed && 'justify-center px-2'
-          )}>
-            <div className="h-8 w-8 rounded-full bg-secondary-200 dark:bg-secondary-700 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-medium text-secondary-600 dark:text-secondary-300">FP</span>
-            </div>
-            {!isCollapsed && (
-              <div className="ml-3 min-w-0">
-                <p className="text-sm font-medium text-secondary-900 dark:text-secondary-100 truncate">
-                  Admin User
-                </p>
-                <p className="text-xs text-secondary-500 dark:text-secondary-400 truncate">
-                  admin@flowpay.io
-                </p>
-              </div>
-            )}
-          </div>
+          <UserProfileSection collapsed={isCollapsed} />
         </div>
       </div>
     </>

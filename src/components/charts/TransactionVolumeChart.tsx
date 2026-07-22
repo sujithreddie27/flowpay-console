@@ -20,6 +20,12 @@ interface TransactionVolumeChartProps {
 }
 
 function formatDate(dateStr: string): string {
+  // Split ISO date string to avoid timezone shift from Date constructor
+  const [year, month, day] = dateStr.split('-').map(Number);
+  if (year && month && day) {
+    const d = new Date(year, month - 1, day);
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+  }
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
 }

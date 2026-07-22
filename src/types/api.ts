@@ -108,8 +108,10 @@ export interface Account {
 }
 
 export interface CreateAccountRequest {
+  userId?: string;
   accountType: 'savings' | 'current' | 'wallet';
   currency: string;
+  dailyLimit?: number;
 }
 
 export interface UpdateAccountRequest {
@@ -550,69 +552,53 @@ export interface SystemNotificationMessage {
 // Monitoring Types
 // ----------------------------------------------------------------------------
 
-export type ServiceStatus = 'up' | 'down' | 'degraded';
-
-export interface ServiceHealth {
-  name: string;
-  status: ServiceStatus;
-  latency?: number;
-  uptime?: number;
-  lastChecked: string;
-  details?: Record<string, any>;
-}
-
+/** Matches backend HealthResponse DTO */
 export interface SystemHealthResponse {
-  overallStatus: 'healthy' | 'degraded' | 'down';
-  services: ServiceHealth[];
-  lastCheck: string;
+  status: string;
+  components: Record<string, ComponentHealth>;
 }
 
-export interface ApiResponseTimeData {
-  timestamp: string;
-  p50: number;
-  p95: number;
-  p99: number;
-  avg: number;
+export interface ComponentHealth {
+  status: string;
+  details: Record<string, any>;
 }
 
-export interface ErrorRateData {
-  timestamp: string;
-  errorRate: number;
-  errorCount: number;
+/** Matches backend ResponseTimesResponse DTO */
+export interface ResponseTimesResponse {
+  p50Ms: number;
+  p95Ms: number;
+  p99Ms: number;
+  meanMs: number;
+  maxMs: number;
   totalRequests: number;
 }
 
-export interface KafkaConsumerLagData {
-  topic: string;
-  partition: number;
-  currentOffset: number;
-  endOffset: number;
-  lag: number;
-  consumerGroup: string;
+/** Matches backend ErrorRatesResponse DTO */
+export interface ErrorRatesResponse {
+  overallErrorRate: number;
+  totalRequests: number;
+  totalErrors: number;
+  errorsByType: Record<string, number>;
 }
 
-export type AlertSeverity = 'critical' | 'warning' | 'info';
-export type AlertStatus = 'active' | 'acknowledged' | 'resolved';
+/** Matches backend KafkaLagResponse DTO */
+export interface KafkaLagResponse {
+  consumerGroups: Record<string, ConsumerGroupLag>;
+}
 
+export interface ConsumerGroupLag {
+  totalLag: number;
+  partitionLag: Record<string, number>;
+}
+
+/** Matches backend AlertResponse DTO */
 export interface MonitoringAlert {
-  id: string;
-  severity: AlertSeverity;
-  status: AlertStatus;
+  alertType: string;
+  severity: string;
   title: string;
-  message: string;
-  source: string;
-  metric?: string;
-  threshold?: number;
-  currentValue?: number;
-  createdAt: string;
-  acknowledgedAt?: string;
-  acknowledgedBy?: string;
-  resolvedAt?: string;
-}
-
-export interface MonitoringAlertListParams {
-  severity?: AlertSeverity;
-  status?: AlertStatus;
-  page?: number;
-  pageSize?: number;
+  description: string;
+  service: string;
+  firedAt?: string;
+  currentValue: number;
+  threshold: number;
 }

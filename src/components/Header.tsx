@@ -11,6 +11,7 @@ import {
 import { cn } from '@/utils';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useThemeContext } from '@/components/ThemeProvider';
+import { useAppSelector } from '@/store';
 import type { Theme } from '@/hooks/useTheme';
 
 interface HeaderProps {
@@ -19,9 +20,13 @@ interface HeaderProps {
 
 export const Header = memo(function Header({ onMenuClick }: HeaderProps) {
   const { theme, isDark, setTheme } = useThemeContext();
+  const user = useAppSelector((state) => state.auth.user);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : '?';
+  const displayName = user?.name?.split(' ')[0] || 'User';
 
   useKeyboardShortcuts([
     {
@@ -221,11 +226,11 @@ export const Header = memo(function Header({ onMenuClick }: HeaderProps) {
           <Menu as="div" className="relative">
             <Menu.Button className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors">
               <div className="h-8 w-8 rounded-full bg-primary-600 flex items-center justify-center">
-                <span className="text-sm font-medium text-white">A</span>
+                <span className="text-sm font-medium text-white">{userInitial}</span>
               </div>
               <div className="hidden sm:block text-left">
                 <p className="text-sm font-medium text-secondary-900 dark:text-secondary-100">
-                  Admin
+                  {displayName}
                 </p>
               </div>
             </Menu.Button>

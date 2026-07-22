@@ -193,11 +193,11 @@ export const transactionService = {
    * Get recent transactions
    */
   getRecentTransactions: async (limit: number = 10): Promise<Transaction[]> => {
-    const response = await apiClient.get<ApiResponse<Transaction[]>>(
-      '/transactions/recent',
-      { params: { limit } }
+    const response = await apiClient.get<ApiResponse<PaginatedResponse<Transaction>>>(
+      '/transactions',
+      { params: { page: 0, size: limit, sortBy: 'createdAt', sortOrder: 'desc' } }
     );
-    return response.data.data;
+    return response.data.data.items ?? response.data.data.content ?? [];
   },
 
   /**

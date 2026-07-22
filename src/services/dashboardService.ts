@@ -8,6 +8,23 @@ import type {
   RevenueByDay,
 } from '@/types';
 
+/**
+ * Normalize a date value from the backend into an ISO date string.
+ * Handles: ISO string ("2026-07-15"), array ([2026,7,15]), epoch number.
+ */
+function normalizeDate(date: unknown): string {
+  if (typeof date === 'string') return date;
+  if (Array.isArray(date)) {
+    // Jackson LocalDate array: [year, month, day] (month is 1-based)
+    const [y, m, d] = date;
+    return `${y}-${String(m).padStart(2, '0')}-${String(d ?? 1).padStart(2, '0')}`;
+  }
+  if (typeof date === 'number') {
+    return new Date(date).toISOString().slice(0, 10);
+  }
+  return String(date);
+}
+
 // ============================================================================
 // Dashboard Service
 // ============================================================================
@@ -41,8 +58,23 @@ export const dashboardService = {
     const raw = response.data.data;
 
     // Transform backend shape to frontend expected shape
-    const volumeData = raw.volumeData ?? raw.transactionVolume ?? [];
-    const revenueData = raw.revenueData ?? raw.revenue ?? [];
+    const rawVolume = raw.volumeData ?? raw.transactionVolume ?? [];
+    const rawRevenue = raw.revenueData ?? raw.revenue ?? [];
+
+    // Map backend field names to frontend types
+    // Backend: { date, count, amount } → Frontend: { date, count, volume }
+    const volumeData: TransactionVolumeData[] = rawVolume.map((item: any) => ({
+      date: normalizeDate(item.date),
+      count: item.count ?? 0,
+      volume: item.volume ?? item.amount ?? 0,
+    }));
+
+    // Backend: { date, fees } → Frontend: { date, revenue, currency }
+    const revenueData: RevenueByDay[] = rawRevenue.map((item: any) => ({
+      date: normalizeDate(item.date),
+      revenue: item.revenue ?? item.fees ?? 0,
+      currency: item.currency ?? 'INR',
+    }));
 
     // statusDistribution may be a Map<string, number> from backend
     let statusDistribution = raw.statusDistribution ?? [];
